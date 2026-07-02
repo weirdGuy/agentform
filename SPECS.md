@@ -40,7 +40,7 @@ All files in a directory tree form one **module** (like a Terraform module). Fil
 ```hcl
 model "fast" {
   provider = "openai"        # openai | anthropic | google | ollama | ...
-  name     = "gpt-4o-mini"
+  id       = "gpt-4o-mini"
   params {
     temperature = 0.2
     max_tokens  = 4096
@@ -48,7 +48,13 @@ model "fast" {
 }
 ```
  
-Vendor-neutral: agents reference `model.fast`, never raw model strings. Swapping providers is a one-line change.
+Vendor-neutral: agents reference `model.fast`, never raw model strings. Swapping providers is a one-line change. (`id` rather than `name` for the provider's model identifier — `name` is reserved for block labels conceptually.)
+
+**Rules:**
+- `params` is an open key/value bag — keys are provider-specific and are validated by the provider/target, not at parse time (a typo like `temperatur` is only caught by the platform; accepted v0 tradeoff). Whole-number values are integers, fractional values floats.
+- Project files do not support expressions or references in v0 — attribute values must be literals.
+- Unknown attributes and blocks are hard errors (strict in v0: loosening later is painless, tightening later breaks users).
+- Duplicate block names within a file are a parse error. Module-wide (cross-file) duplicate detection is owned by module loading (see issue #6).
  
 ### 3.2 `agent` (.agent file)
  

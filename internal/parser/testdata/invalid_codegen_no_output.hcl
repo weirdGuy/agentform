@@ -1,0 +1,3 @@
+target "langgraph" {
+  type = "codegen"
+}
