@@ -1,0 +1,3 @@
+model "fast" {
+  provider = "openai"
+}
