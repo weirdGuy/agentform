@@ -55,6 +55,17 @@ Vendor-neutral: agents reference `model.fast`, never raw model strings. Swapping
 - Project files do not support expressions or references in v0 — attribute values must be literals.
 - Unknown attributes and blocks are hard errors (strict in v0: loosening later is painless, tightening later breaks users).
 - Duplicate block names within a file are a parse error. Module-wide (cross-file) duplicate detection is owned by module loading (see issue #6).
+
+**Codegen provider mapping.** Codegen targets support a fixed provider set; a `provider` outside this table is a codegen error (not a parse error — the block itself stays valid, e.g. for platform targets that accept it). LangGraph mapping:
+
+| provider | `init_chat_model` prefix | pip package | credentials |
+|----------|--------------------------|-------------|-------------|
+| `openai` | `openai` | `langchain-openai` | `OPENAI_API_KEY` |
+| `anthropic` | `anthropic` | `langchain-anthropic` | `ANTHROPIC_API_KEY` |
+| `google` | `google_genai` | `langchain-google-genai` | `GOOGLE_API_KEY` |
+| `ollama` | `ollama` | `langchain-ollama` | none (local runtime) |
+
+For codegen, `params` keys must additionally be valid Python keyword arguments (`max_tokens`, not `max-tokens`); a key that is not is a codegen error.
  
 ### 3.2 `agent` (.agent file)
  
@@ -97,6 +108,7 @@ agent "weather" {
 - Prompt owns only its **template body** and the **variables it requires**.
 - Validation: every variable a prompt requires must be satisfiable from the agent's inputs/outputs; conflict = compile error.
 - `system_prompt` is **optional** (issue #7): an agent may omit it entirely, in which case the prompt-variable check is a no-op. When present it must be a `prompt.<name>` reference.
+- An input `default` that references another agent's output (`default = agent.forecast.output.summary`) creates the dependency edge and is validated at compile time (the referenced output must exist), but **v0 codegen does not wire the data flow** — see §4.
 ### 3.3 `tool` (.tool file)
  
 A tool is an **interface + implementation source**.
@@ -142,10 +154,21 @@ tool "web_search" {
 | `runtime` | Implemented in user code within the generated project (codegen emits a stub) |
 | `script` | Inline/local script executed by generated glue code |
 
+**Codegen mapping (LangGraph target):**
+
+| kind | Generated binding |
+|------|-------------------|
+| `mcp` | `@tool` function calling the named server tool through a generated MCP bridge |
+| `http` | `@tool` function POSTing the tool's params as a JSON object to `uri` |
+| `runtime` | `@tool` stub raising `NotImplementedError` until user code supplies the body |
+| `builtin` | Codegen error, **permanently**: platform-provided tools have no local binding — `builtin` is only meaningful on platform targets |
+| `script` | Codegen error, **for now**: glue-code execution is deferred (issue #36) |
+
 **Rules:**
 - `kind` is a closed enum (like `target.type`): `mcp | http | builtin | runtime | script`. Unknown kinds are compile errors.
 - Exactly one `source` block and exactly one `returns` block per tool. Zero `param` blocks is fine.
 - `uri` is required for `mcp`, `http`, and `script` sources; it is an error on `builtin` and `runtime` (they have no external location — the platform or generated stub is the implementation). Meaningless fields are errors, not ignored.
+- For `mcp` sources the `uri` pins **identity only**: `mcp://<server>/<tool>` names the server and the tool on it — nothing more. Transport and connection details (command, endpoint, headers) are deployment configuration, not spec: generated projects read them at runtime from `mcp_servers.json` (langchain-mcp-adapters connection format), overridable via the `ADL_MCP_CONFIG` env var.
 - Param and returns types are bare keywords, not strings: `type = string`, never `type = "string"`. Closed enum in v0: `string | number | bool` (compound types deferred to v1).
 - `default` must be a literal whose type matches the declared `type`; a mismatch or an explicit `default = null` is a compile error. A param with a `default` is optional at call time; there is no separate `optional` attribute on tool params.
 - `description` is optional on both the tool and its params at parse time (targets may enforce more).
@@ -204,6 +227,7 @@ target "openai_assistants" {
 ## 4. Dependency & Reference Semantics
  
 - **References create the DAG.** `agent.forecast.output.summary` makes `weather` depend on `forecast`. Same rule for `model.*`, `tool.*`, `prompt.*`.
+- **References order and validate; v0 codegen does not move data.** A cross-agent reference is checked at compile time (the output must exist) and orders the DAG, but generated code exposes the referencing input as an ordinary caller-supplied parameter — the caller runs the upstream agent and passes the value. Wiring actual data flow is orchestration, deferred to v1 (§7).
 - `depends_on` is the explicit escape hatch for ordering without data flow (Terraform-style).
 - Cycles are a compile error.
 - Cross-module references (v1): `module.<name>.agent.<name>` — registry/import system deferred.
