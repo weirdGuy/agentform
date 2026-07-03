@@ -1,0 +1,6 @@
+agent "lonely" {
+  model         = model.fast
+  system_prompt = prompt.lonely_system
+
+  depends_on = [agent.ghost]
+}

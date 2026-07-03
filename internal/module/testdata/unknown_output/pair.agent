@@ -1,0 +1,18 @@
+agent "a" {
+  model         = model.fast
+  system_prompt = prompt.shared
+
+  output "x" {
+    type = string
+  }
+}
+
+agent "b" {
+  model         = model.fast
+  system_prompt = prompt.shared
+
+  input "ctx" {
+    type    = string
+    default = agent.a.output.y
+  }
+}

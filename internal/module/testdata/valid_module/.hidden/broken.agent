@@ -1,0 +1,2 @@
+this is not valid HCL {{{ and must never be parsed because hidden
+directories are skipped during module loading
