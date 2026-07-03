@@ -1,0 +1,14 @@
+agent "forecast" {
+  description = "Produces a short forecast summary for a location"
+
+  model         = model.fast
+  system_prompt = prompt.forecast_system
+
+  input "location" {
+    type = string
+  }
+
+  output "summary" {
+    type = string
+  }
+}

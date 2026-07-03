@@ -1,0 +1,6 @@
+---
+name = "forecast_system"
+---
+Produce a one-paragraph weather forecast summary for {{location}}.
+Be specific about temperature and precipitation. Note that literal
+braces like {"not": "a variable"} are plain text, not template vars.

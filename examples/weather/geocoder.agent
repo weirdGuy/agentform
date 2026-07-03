@@ -1,0 +1,14 @@
+# No system_prompt: exercises the ratified "check is a no-op when absent" path (#7)
+agent "geocoder" {
+  description = "Resolves place names to coordinates"
+
+  model = model.fast
+
+  input "location" {
+    type = string
+  }
+
+  output "coordinates" {
+    type = string
+  }
+}
