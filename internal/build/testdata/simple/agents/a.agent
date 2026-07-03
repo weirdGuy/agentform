@@ -1,0 +1,7 @@
+agent "a" {
+  model = model.m
+
+  output "x" {
+    type = string
+  }
+}
