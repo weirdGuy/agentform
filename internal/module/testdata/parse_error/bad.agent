@@ -1,0 +1,2 @@
+agent "broken" {
+  model = model.fast

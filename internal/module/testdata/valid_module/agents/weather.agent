@@ -1,0 +1,17 @@
+agent "weather" {
+  model         = model.fast
+  system_prompt = prompt.weather_system
+
+  tools = [tool.web_search]
+
+  input "forecast_context" {
+    type    = string
+    default = agent.forecast.output.summary
+  }
+
+  output "report" {
+    type = string
+  }
+
+  depends_on = [agent.geocoder]
+}

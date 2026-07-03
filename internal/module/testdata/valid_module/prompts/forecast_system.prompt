@@ -1,0 +1,4 @@
+---
+name = "forecast_system"
+---
+Produce a forecast summary for the coordinates.

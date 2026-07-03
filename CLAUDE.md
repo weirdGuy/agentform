@@ -14,7 +14,8 @@ Agentform is "Terraform for AI agents": a declarative HCL spec compiled to agent
 cmd/adl/            CLI entrypoint (cobra)
 internal/
   parser/           HCL decode (hashicorp/hcl/v2) → AST
-  schema/           typed config structs, validation, reference resolution
+  schema/           typed config structs, validation
+  module/           directory walk → symbol table, cross-file reference resolution
   graph/            DAG construction, cycle detection, topo sort
   build/            codegen engine + per-target generators (build/langgraph/)
   provider/         platform reconcilers (provider/openai/)

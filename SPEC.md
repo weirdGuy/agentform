@@ -230,7 +230,8 @@ State file (`adl.state.json`): maps block addresses → remote resource IDs, tra
 cmd/adl/            CLI (cobra)
 internal/
   parser/           HCL decode (hashicorp/hcl/v2) → AST
-  schema/           typed config structs, validation, reference resolution
+  schema/           typed config structs, validation
+  module/           directory walk → symbol table, cross-file reference resolution
   graph/            DAG construction, cycle detection, topo sort
   build/            codegen engine
     langgraph/      target: LangGraph (Python)

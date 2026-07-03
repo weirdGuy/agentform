@@ -1,0 +1,4 @@
+model "fast" {
+  provider = "anthropic"
+  id       = "claude-sonnet-5"
+}
