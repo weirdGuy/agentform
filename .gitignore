@@ -3,3 +3,17 @@
 
 # Test/coverage artifacts
 *.out
+
+# Generated output: reproducible from `adl build`, deliberately not
+# committed — codegen determinism is enforced by tests, so committed
+# artifacts are not needed to detect drift.
+examples/**/gen/
+
+# MCP server connection config: can carry API keys in URLs (hosted
+# endpoints like Tavily embed the key as a query param). Must never be
+# committable by accident.
+mcp_servers.json
+
+# Python artifacts from running generated projects
+**/__pycache__/
+**/.venv/
