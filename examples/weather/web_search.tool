@@ -22,6 +22,6 @@ tool "web_search" {
 
   source {
     kind = "mcp"
-    uri  = "mcp://search-server/web_search"
+    uri  = "mcp://search-server/tavily_search"
   }
 }

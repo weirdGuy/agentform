@@ -29,13 +29,14 @@ Agents:
 
 Tools:
 
-- `tool.web_search` (mcp) — MCP server `search-server`, tool `web_search`
+- `tool.web_search` (mcp) — MCP server `search-server`, tool `tavily_search`
 
 ## MCP servers
 
 Tools with `kind = "mcp"` read server connection details from
 `mcp_servers.json` in the working directory (or the file named by
-`ADL_MCP_CONFIG`), keyed by server name:
+`ADL_MCP_CONFIG`), keyed by server name. Values are langchain-mcp-adapters
+connection dicts — a local stdio server:
 
 ```json
 {
@@ -46,3 +47,20 @@ Tools with `kind = "mcp"` read server connection details from
   }
 }
 ```
+
+or a hosted HTTP endpoint:
+
+```json
+{
+  "<server>": {
+    "transport": "streamable_http",
+    "url": "https://example.com/mcp/?apiKey=YOUR-KEY"
+  }
+}
+```
+
+Hosted endpoints often embed the API key in the URL, so treat the config
+file as a secret and keep it out of version control.
+
+The spec's `mcp://<server>/<tool>` URI must name a tool the server
+actually advertises; the call fails with "does not expose tool" otherwise.

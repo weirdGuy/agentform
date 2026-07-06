@@ -1,3 +1,74 @@
 # agentform
 
-Agentform is "Terraform for AI agents." It provides a vendor-neutral, versionable spec (.agent, .tool, .prompt files in HCL) and a Go toolchain with two paths: agentform build generates runnable projects for frameworks like LangGraph, and agentform plan/apply reconciles agents as long-lived resources on hosted platforms like OpenAI Assistants – with state, diffs, and drift detection.
+Agentform is "Terraform for AI agents." Agents today are defined imperatively inside frameworks (LangGraph, CrewAI) or clicked together in platform UIs (OpenAI Assistants, Bedrock Agents) — there is no vendor-neutral, versionable, reviewable source of truth. Agentform provides one: a typed, declarative spec (`.agent`, `.tool`, `.prompt` files in HCL) and a Go toolchain with two paths — `adl build` generates runnable projects for target frameworks, and `adl plan` / `adl apply` reconcile agents as long-lived resources on hosted platforms, with state, diffs, and drift detection.
+
+The full design lives in [SPEC.md](SPEC.md).
+
+## Quickstart: build the weather example
+
+Prerequisites: Go 1.26+, Python 3.11+, an OpenAI API key, and a [Tavily](https://tavily.com) API key (the example's search tool runs against Tavily's hosted MCP server).
+
+Compile the spec to a LangGraph project:
+
+```sh
+go build ./cmd/adl
+./adl validate examples/weather/
+./adl build examples/weather/
+```
+
+`adl build` writes the generated project to `examples/weather/gen/langgraph` (the target's declared `output`). Generated output is not committed: it is reproducible from the spec, and codegen determinism is enforced by tests.
+
+Set up the generated project:
+
+```sh
+cd examples/weather/gen/langgraph
+python3 -m venv .venv
+. .venv/bin/activate
+pip install -r requirements.txt
+```
+
+The example's `web_search` tool is pinned to an MCP server and tool by its spec URI, `mcp://search-server/tavily_search`. How to *reach* that server is deployment configuration, not spec: create `mcp_servers.json` in the working directory (or point the `ADL_MCP_CONFIG` env var at a file elsewhere). For Tavily's hosted server:
+
+```json
+{
+  "search-server": {
+    "transport": "streamable_http",
+    "url": "https://mcp.tavily.com/mcp/?tavilyApiKey=tvly-YOUR-KEY"
+  }
+}
+```
+
+The URL embeds your API key, which is why `mcp_servers.json` is gitignored — treat it as a secret, never commit it. Also note the spec URI's last path segment (`tavily_search`) must name a tool the server actually advertises, or calls fail with "does not expose tool".
+
+Export the model credential (the example's `model "fast"` block uses provider `openai`):
+
+```sh
+export OPENAI_API_KEY=sk-...
+```
+
+Run the agent:
+
+```sh
+python3 main.py weather --inputs '{"location": "Lisbon", "date": "tomorrow"}'
+```
+
+It prints the agent's declared output contract as JSON:
+
+```json
+{
+  "weather": "..."
+}
+```
+
+The generated `README.md` inside `gen/langgraph` owns the run-the-project side in full: every agent's inputs and outputs, tool bindings, and MCP configuration.
+
+One v0 caveat (SPEC.md §3.2/§4): `agent.weather`'s optional `forecast_context` input references `agent.forecast`'s output. That reference is validated at compile time and orders the dependency graph, but generated code does not run the upstream agent for you — if you want the context, run `forecast` yourself and pass its summary via `--inputs`.
+
+## Development
+
+```sh
+go build ./...   # build everything
+go test ./...    # run all tests
+```
+
+SPEC.md is the source of truth for design decisions; CLAUDE.md documents the day-to-day conventions.

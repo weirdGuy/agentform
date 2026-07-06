@@ -224,8 +224,12 @@ func genReadme(tgt *schema.Target, agents []*schema.Agent, tools []*schema.Tool,
 
 	if hasMCP {
 		b.WriteString("\n## MCP servers\n\n")
-		b.WriteString("Tools with `kind = \"mcp\"` read server connection details from\n`mcp_servers.json` in the working directory (or the file named by\n`ADL_MCP_CONFIG`), keyed by server name:\n\n")
-		b.WriteString("```json\n{\n  \"<server>\": {\n    \"transport\": \"stdio\",\n    \"command\": \"your-mcp-server\",\n    \"args\": []\n  }\n}\n```\n")
+		b.WriteString("Tools with `kind = \"mcp\"` read server connection details from\n`mcp_servers.json` in the working directory (or the file named by\n`ADL_MCP_CONFIG`), keyed by server name. Values are langchain-mcp-adapters\nconnection dicts — a local stdio server:\n\n")
+		b.WriteString("```json\n{\n  \"<server>\": {\n    \"transport\": \"stdio\",\n    \"command\": \"your-mcp-server\",\n    \"args\": []\n  }\n}\n```\n\n")
+		b.WriteString("or a hosted HTTP endpoint:\n\n")
+		b.WriteString("```json\n{\n  \"<server>\": {\n    \"transport\": \"streamable_http\",\n    \"url\": \"https://example.com/mcp/?apiKey=YOUR-KEY\"\n  }\n}\n```\n\n")
+		b.WriteString("Hosted endpoints often embed the API key in the URL, so treat the config\nfile as a secret and keep it out of version control.\n\n")
+		b.WriteString("The spec's `mcp://<server>/<tool>` URI must name a tool the server\nactually advertises; the call fails with \"does not expose tool\" otherwise.\n")
 	}
 
 	if hasRuntime {
