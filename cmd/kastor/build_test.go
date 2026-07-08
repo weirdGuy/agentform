@@ -12,7 +12,7 @@ import (
 	"testing"
 )
 
-// runBuildCmd executes "adl build <args>" and returns combined output and
+// runBuildCmd executes "kastor build <args>" and returns combined output and
 // the execution error.
 func runBuildCmd(t *testing.T, args ...string) (string, error) {
 	t.Helper()
@@ -25,7 +25,7 @@ func runBuildCmd(t *testing.T, args ...string) (string, error) {
 	// main.go prints the returned error to stderr; append it so tests see
 	// the same combined output a user does.
 	if err != nil {
-		fmt.Fprintf(&out, "adl: %v\n", err)
+		fmt.Fprintf(&out, "kastor: %v\n", err)
 	}
 	return out.String(), err
 }
@@ -63,7 +63,7 @@ func TestBuildCommandErrors(t *testing.T) {
 			dir:      "testdata/build/platform_only",
 			args:     []string{"--target", "openai_assistants"},
 			wantCode: 2,
-			wantOut:  []string{"target.openai_assistants", "platform", "adl plan"},
+			wantOut:  []string{"target.openai_assistants", "platform", "kastor plan"},
 			skipOut:  []string{"Built"},
 		},
 		{
@@ -136,7 +136,7 @@ func TestBuildCommandSingleTarget(t *testing.T) {
 	if !strings.Contains(out, "Built target langgraph:") {
 		t.Errorf("output missing success line:\n%s", out)
 	}
-	for _, f := range []string{".adlbuild", "models.py", filepath.Join("agents", "solo.py")} {
+	for _, f := range []string{".kastorbuild", "models.py", filepath.Join("agents", "solo.py")} {
 		if _, err := os.Stat(filepath.Join(dir, "gen", "langgraph", f)); err != nil {
 			t.Errorf("expected generated file %s: %v", f, err)
 		}
@@ -174,7 +174,7 @@ func TestBuildCommandWeatherExample(t *testing.T) {
 
 	outDir := filepath.Join(dir, "gen", "langgraph")
 	for _, f := range []string{
-		".adlbuild",
+		".kastorbuild",
 		"models.py",
 		filepath.Join("agents", "weather.py"),
 		filepath.Join("agents", "forecast.py"),

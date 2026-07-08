@@ -7,8 +7,8 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/weirdGuy/agentform/internal/parser"
-	"github.com/weirdGuy/agentform/internal/schema"
+	"github.com/weirdGuy/kastor/internal/parser"
+	"github.com/weirdGuy/kastor/internal/schema"
 )
 
 func TestParsePromptFile(t *testing.T) {

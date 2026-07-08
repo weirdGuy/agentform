@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/hcl/v2/gohcl"
 	"github.com/hashicorp/hcl/v2/hclparse"
 
-	"github.com/weirdGuy/agentform/internal/schema"
+	"github.com/weirdGuy/kastor/internal/schema"
 )
 
 type agentFileHCL struct {

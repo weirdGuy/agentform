@@ -37,7 +37,7 @@ type AttrDiff struct {
 // Provider is the contract every platform reconciler implements
 // (SPEC.md §6). The engine holds providers to these rules:
 //
-//   - Read reports found=false for a resource deleted outside adl; that is
+//   - Read reports found=false for a resource deleted outside kastor; that is
 //     data (drift), not an error.
 //   - Create returns the platform's identifier for the new resource; the
 //     engine records it in state immediately.
@@ -49,7 +49,7 @@ type AttrDiff struct {
 //     (update-or-noop decision) and with the last-applied config from state
 //     (drift detection).
 //   - Diff must be pure and deterministic; Read must not mutate anything.
-//     adl plan issues only Read and Diff calls.
+//     kastor plan issues only Read and Diff calls.
 type Provider interface {
 	Read(ctx context.Context, id string) (remote Object, found bool, err error)
 	Create(ctx context.Context, desired *Resource) (id string, err error)

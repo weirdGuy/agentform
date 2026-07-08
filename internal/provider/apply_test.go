@@ -9,9 +9,9 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/weirdGuy/agentform/internal/provider"
-	"github.com/weirdGuy/agentform/internal/provider/providertest"
-	"github.com/weirdGuy/agentform/internal/state"
+	"github.com/weirdGuy/kastor/internal/provider"
+	"github.com/weirdGuy/kastor/internal/provider/providertest"
+	"github.com/weirdGuy/kastor/internal/state"
 )
 
 // countingSave returns a save callback that counts invocations.

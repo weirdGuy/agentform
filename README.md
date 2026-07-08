@@ -1,6 +1,6 @@
-# agentform
+# Kastor
 
-Agentform is "Terraform for AI agents." Agents today are defined imperatively inside frameworks (LangGraph, CrewAI) or clicked together in platform UIs (OpenAI Assistants, Bedrock Agents) — there is no vendor-neutral, versionable, reviewable source of truth. Agentform provides one: a typed, declarative spec (`.agent`, `.tool`, `.prompt` files in HCL) and a Go toolchain with two paths — `adl build` generates runnable projects for target frameworks, and `adl plan` / `adl apply` reconcile agents as long-lived resources on hosted platforms, with state, diffs, and drift detection.
+Kastor is "Terraform for AI agents." Agents today are defined imperatively inside frameworks (LangGraph, CrewAI) or clicked together in platform UIs (OpenAI Assistants, Bedrock Agents) — there is no vendor-neutral, versionable, reviewable source of truth. Kastor provides one: a typed, declarative spec (`.agent`, `.tool`, `.prompt` files in HCL) and a Go toolchain with two paths — `kastor build` generates runnable projects for target frameworks, and `kastor plan` / `kastor apply` reconcile agents as long-lived resources on hosted platforms, with state, diffs, and drift detection.
 
 The full design lives in [SPEC.md](SPEC.md).
 
@@ -11,12 +11,12 @@ Prerequisites: Go 1.26+, Python 3.11+, an OpenAI API key, and a [Tavily](https:/
 Compile the spec to a LangGraph project:
 
 ```sh
-go build ./cmd/adl
-./adl validate examples/weather/
-./adl build examples/weather/
+go build ./cmd/kastor
+./kastor validate examples/weather/
+./kastor build examples/weather/
 ```
 
-`adl build` writes the generated project to `examples/weather/gen/langgraph` (the target's declared `output`). Generated output is not committed: it is reproducible from the spec, and codegen determinism is enforced by tests.
+`kastor build` writes the generated project to `examples/weather/gen/langgraph` (the target's declared `output`). Generated output is not committed: it is reproducible from the spec, and codegen determinism is enforced by tests.
 
 Set up the generated project:
 
@@ -27,7 +27,7 @@ python3 -m venv .venv
 pip install -r requirements.txt
 ```
 
-The example's `web_search` tool is pinned to an MCP server and tool by its spec URI, `mcp://search-server/tavily_search`. How to *reach* that server is deployment configuration, not spec: create `mcp_servers.json` in the working directory (or point the `ADL_MCP_CONFIG` env var at a file elsewhere). For Tavily's hosted server:
+The example's `web_search` tool is pinned to an MCP server and tool by its spec URI, `mcp://search-server/tavily_search`. How to *reach* that server is deployment configuration, not spec: create `mcp_servers.json` in the working directory (or point the `KASTOR_MCP_CONFIG` env var at a file elsewhere). For Tavily's hosted server:
 
 ```json
 {

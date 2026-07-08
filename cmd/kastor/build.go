@@ -10,11 +10,11 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/weirdGuy/agentform/internal/build"
-	"github.com/weirdGuy/agentform/internal/build/langgraph"
-	"github.com/weirdGuy/agentform/internal/graph"
-	"github.com/weirdGuy/agentform/internal/module"
-	"github.com/weirdGuy/agentform/internal/schema"
+	"github.com/weirdGuy/kastor/internal/build"
+	"github.com/weirdGuy/kastor/internal/build/langgraph"
+	"github.com/weirdGuy/kastor/internal/graph"
+	"github.com/weirdGuy/kastor/internal/module"
+	"github.com/weirdGuy/kastor/internal/schema"
 )
 
 // generators maps a codegen target's name to its framework generator: the
@@ -31,7 +31,7 @@ func newBuildCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "build [--target name] [dir]",
 		Short: "Generate framework code from the module's codegen targets",
-		Long:  "build runs the full validate pipeline, then generates code for the module's codegen targets and syncs it into each target's declared output directory. With --target only the named target is built; otherwise all codegen targets build in lexicographic name order. Platform targets are never built — they belong to adl plan / adl apply.",
+		Long:  "build runs the full validate pipeline, then generates code for the module's codegen targets and syncs it into each target's declared output directory. With --target only the named target is built; otherwise all codegen targets build in lexicographic name order. Platform targets are never built — they belong to kastor plan / kastor apply.",
 		Args:  usageMaxArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			dir := "."
@@ -55,7 +55,7 @@ func usageMaxArgs(n int) cobra.PositionalArgs {
 	}
 }
 
-// runBuild validates the module exactly like adl validate, then builds the
+// runBuild validates the module exactly like kastor validate, then builds the
 // selected codegen targets in order, stopping at the first failure. Output
 // already synced for earlier targets stays in place — every target's sync is
 // independently complete or untouched.
@@ -89,7 +89,7 @@ func selectTargets(mod *module.Module, name string) ([]*schema.Target, error) {
 				continue
 			}
 			if tgt.Type != "codegen" {
-				return nil, usageErrorf("target.%s is a %s target; adl build only builds codegen targets — use adl plan / adl apply for it", name, tgt.Type)
+				return nil, usageErrorf("target.%s is a %s target; kastor build only builds codegen targets — use kastor plan / kastor apply for it", name, tgt.Type)
 			}
 			return []*schema.Target{tgt}, nil
 		}
@@ -103,7 +103,7 @@ func selectTargets(mod *module.Module, name string) ([]*schema.Target, error) {
 		}
 	}
 	if len(targets) == 0 {
-		return nil, usageErrorf("module declares no codegen targets; adl build needs at least one target with type = \"codegen\"")
+		return nil, usageErrorf("module declares no codegen targets; kastor build needs at least one target with type = \"codegen\"")
 	}
 	sort.Slice(targets, func(i, j int) bool { return targets[i].Name < targets[j].Name })
 	return targets, nil

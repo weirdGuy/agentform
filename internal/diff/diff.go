@@ -1,4 +1,4 @@
-// Package diff produces unified diffs for adl fmt's -diff output. It is a
+// Package diff produces unified diffs for kastor fmt's -diff output. It is a
 // small line-based LCS implementation kept in-house because the approved
 // dependency set has no diff library; it targets human review of
 // config-sized files, not patch-perfect fidelity on huge inputs.
@@ -57,7 +57,7 @@ func splitLines(src []byte) []string {
 
 // editScript computes a line-based edit script from a to b via
 // longest-common-subsequence. O(len(a)*len(b)) time and space, which is
-// fine for the file sizes adl fmt handles.
+// fine for the file sizes kastor fmt handles.
 func editScript(a, b []string) []op {
 	// lcs[i][j] = LCS length of a[i:] and b[j:].
 	lcs := make([][]int, len(a)+1)

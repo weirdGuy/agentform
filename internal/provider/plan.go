@@ -8,10 +8,10 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/weirdGuy/agentform/internal/graph"
-	"github.com/weirdGuy/agentform/internal/module"
-	"github.com/weirdGuy/agentform/internal/schema"
-	"github.com/weirdGuy/agentform/internal/state"
+	"github.com/weirdGuy/kastor/internal/graph"
+	"github.com/weirdGuy/kastor/internal/module"
+	"github.com/weirdGuy/kastor/internal/schema"
+	"github.com/weirdGuy/kastor/internal/state"
 )
 
 // Action is what apply will do to one resource.
@@ -81,7 +81,7 @@ func (p *Plan) Counts() (create, update, del, noop int) {
 
 // Job bundles what the engine consumes: the validated module, its graph,
 // the platform target being reconciled, and the loaded state file — the
-// same pipeline output adl validate assembles, plus state.
+// same pipeline output kastor validate assembles, plus state.
 type Job struct {
 	Module *module.Module
 	Graph  *graph.Graph
@@ -96,7 +96,7 @@ type Job struct {
 // Per resource: absent from state → create; tracked but the remote object
 // is gone → create (with a drift warning); otherwise the provider's Diff
 // against the desired config decides update vs. noop, and its Diff against
-// the last-applied config detects drift (remote changed outside adl).
+// the last-applied config detects drift (remote changed outside kastor).
 func BuildPlan(ctx context.Context, p Provider, job *Job) (*Plan, error) {
 	plan := &Plan{Target: job.Target.Name}
 	resources := stateResources(job)
@@ -132,7 +132,7 @@ func BuildPlan(ctx context.Context, p Provider, job *Job) (*Plan, error) {
 			plan.Diagnostics = append(plan.Diagnostics, Diagnostic{
 				Severity: SeverityWarning,
 				Addr:     addr,
-				Summary:  "remote object deleted outside adl",
+				Summary:  "remote object deleted outside kastor",
 				Detail:   fmt.Sprintf("state maps %s to %s, but the platform has no such object; apply will recreate it", addr, st.ID),
 			})
 			continue
@@ -150,7 +150,7 @@ func BuildPlan(ctx context.Context, p Provider, job *Job) (*Plan, error) {
 			plan.Diagnostics = append(plan.Diagnostics, Diagnostic{
 				Severity: SeverityWarning,
 				Addr:     addr,
-				Summary:  "remote object changed outside adl",
+				Summary:  "remote object changed outside kastor",
 				Detail:   "changed attributes: " + strings.Join(diffPaths(drift), ", "),
 			})
 		}

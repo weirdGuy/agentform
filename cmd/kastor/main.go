@@ -7,7 +7,7 @@ import (
 
 func main() {
 	if err := newRootCmd().Execute(); err != nil {
-		fmt.Fprintf(os.Stderr, "adl: %v\n", err)
+		fmt.Fprintf(os.Stderr, "kastor: %v\n", err)
 		os.Exit(exitCode(err))
 	}
 }

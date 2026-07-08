@@ -12,16 +12,16 @@ import (
 	"github.com/hashicorp/hcl/v2/hclwrite"
 	"github.com/spf13/cobra"
 
-	"github.com/weirdGuy/agentform/internal/diff"
-	"github.com/weirdGuy/agentform/internal/module"
+	"github.com/weirdGuy/kastor/internal/diff"
+	"github.com/weirdGuy/kastor/internal/module"
 )
 
 func newFmtCmd() *cobra.Command {
 	var check, showDiff bool
 	cmd := &cobra.Command{
 		Use:   "fmt [dir]",
-		Short: "Canonically format ADL files",
-		Long:  "fmt rewrites the module's HCL files (.agent, .tool, adl.hcl, .adl) to canonical style and prints the names of changed files. Prompt files are left untouched — their body is preserved byte for byte. With --check nothing is written and a non-zero exit reports files that would change; --diff prints unified diffs.",
+		Short: "Canonically format Kastor files",
+		Long:  "fmt rewrites the module's HCL files (.agent, .tool, kastor.hcl, .kastor) to canonical style and prints the names of changed files. Prompt files are left untouched — their body is preserved byte for byte. With --check nothing is written and a non-zero exit reports files that would change; --diff prints unified diffs.",
 		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			dir := "."
@@ -102,8 +102,8 @@ func runFmt(stdout, stderr io.Writer, dir string, check, showDiff bool) error {
 // not a standalone HCL document.
 func formattable(path string) bool {
 	switch filepath.Ext(path) {
-	case ".agent", ".tool", ".adl":
+	case ".agent", ".tool", ".kastor":
 		return true
 	}
-	return filepath.Base(path) == "adl.hcl"
+	return filepath.Base(path) == "kastor.hcl"
 }

@@ -8,10 +8,10 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/weirdGuy/agentform/internal/build"
-	"github.com/weirdGuy/agentform/internal/graph"
-	"github.com/weirdGuy/agentform/internal/module"
-	"github.com/weirdGuy/agentform/internal/schema"
+	"github.com/weirdGuy/kastor/internal/build"
+	"github.com/weirdGuy/kastor/internal/graph"
+	"github.com/weirdGuy/kastor/internal/module"
+	"github.com/weirdGuy/kastor/internal/schema"
 )
 
 // stub is a Generator returning a fixed result, for exercising the engine

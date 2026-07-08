@@ -1,4 +1,4 @@
-module github.com/weirdGuy/agentform
+module github.com/weirdGuy/kastor
 
 go 1.26.4
 

@@ -1,4 +1,4 @@
-// Package parser decodes ADL source files into the typed structs in
+// Package parser decodes Kastor source files into the typed structs in
 // internal/schema using hashicorp/hcl/v2.
 package parser
 
@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/hcl/v2/hclparse"
 	"github.com/zclconf/go-cty/cty"
 
-	"github.com/weirdGuy/agentform/internal/schema"
+	"github.com/weirdGuy/kastor/internal/schema"
 )
 
 // projectFileHCL mirrors the raw HCL layout of a project file. It exists only
@@ -46,7 +46,7 @@ type authHCL struct {
 	APIKeyEnv string `hcl:"api_key_env"`
 }
 
-// ParseProjectFile reads and decodes a project file (adl.hcl / .adl).
+// ParseProjectFile reads and decodes a project file (kastor.hcl / .kastor).
 func ParseProjectFile(path string) (*schema.ProjectFile, error) {
 	src, err := os.ReadFile(path)
 	if err != nil {

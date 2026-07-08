@@ -10,11 +10,11 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/weirdGuy/agentform/internal/build"
-	"github.com/weirdGuy/agentform/internal/build/buildtest"
-	"github.com/weirdGuy/agentform/internal/build/langgraph"
-	"github.com/weirdGuy/agentform/internal/graph"
-	"github.com/weirdGuy/agentform/internal/module"
+	"github.com/weirdGuy/kastor/internal/build"
+	"github.com/weirdGuy/kastor/internal/build/buildtest"
+	"github.com/weirdGuy/kastor/internal/build/langgraph"
+	"github.com/weirdGuy/kastor/internal/graph"
+	"github.com/weirdGuy/kastor/internal/module"
 )
 
 var update = flag.Bool("update", false, "rewrite the golden files under testdata")
@@ -121,7 +121,7 @@ func TestGenerateMinimalModule(t *testing.T) {
 }
 
 // TestGenerateErrors covers the specs the langgraph target must reject:
-// each fixture is a valid ADL module that has no langgraph mapping.
+// each fixture is a valid Kastor module that has no langgraph mapping.
 func TestGenerateErrors(t *testing.T) {
 	tests := []struct {
 		name     string

@@ -9,7 +9,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/weirdGuy/agentform/internal/state"
+	"github.com/weirdGuy/kastor/internal/state"
 )
 
 // sample returns a populated state file exercising every schema field:

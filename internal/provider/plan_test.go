@@ -9,11 +9,11 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/weirdGuy/agentform/internal/graph"
-	"github.com/weirdGuy/agentform/internal/provider"
-	"github.com/weirdGuy/agentform/internal/provider/providertest"
-	"github.com/weirdGuy/agentform/internal/schema"
-	"github.com/weirdGuy/agentform/internal/state"
+	"github.com/weirdGuy/kastor/internal/graph"
+	"github.com/weirdGuy/kastor/internal/provider"
+	"github.com/weirdGuy/kastor/internal/provider/providertest"
+	"github.com/weirdGuy/kastor/internal/schema"
+	"github.com/weirdGuy/kastor/internal/state"
 )
 
 // newJob loads the weather fixture and assembles a Job against target.fake
@@ -208,7 +208,7 @@ func TestBuildPlanRemovedFromSpecDeletesInReverseDependencyOrder(t *testing.T) {
 	}
 }
 
-func TestBuildPlanRemoteDeletedOutsideAdl(t *testing.T) {
+func TestBuildPlanRemoteDeletedOutsideKastor(t *testing.T) {
 	job := newJob(t)
 	fake := providertest.New()
 	ids := seedAll(t, job, fake)
@@ -235,7 +235,7 @@ func TestBuildPlanRemoteDeletedOutsideAdl(t *testing.T) {
 	if d.Severity != provider.SeverityWarning || d.Addr != "agent.forecast" {
 		t.Errorf("diagnostic = %+v, want warning for agent.forecast", d)
 	}
-	if !strings.Contains(d.Summary, "deleted outside adl") {
+	if !strings.Contains(d.Summary, "deleted outside kastor") {
 		t.Errorf("Summary = %q, want mention of out-of-band deletion", d.Summary)
 	}
 }
@@ -272,7 +272,7 @@ func TestBuildPlanRemoteDriftConvergesBackWithWarning(t *testing.T) {
 	if d.Severity != provider.SeverityWarning || d.Addr != "agent.weather" {
 		t.Errorf("diagnostic = %+v, want warning for agent.weather", d)
 	}
-	if !strings.Contains(d.Summary, "changed outside adl") || !strings.Contains(d.Detail, "instructions") {
+	if !strings.Contains(d.Summary, "changed outside kastor") || !strings.Contains(d.Detail, "instructions") {
 		t.Errorf("diagnostic %+v does not name the drifted attribute", d)
 	}
 }

@@ -7,8 +7,8 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/weirdGuy/agentform/internal/provider"
-	"github.com/weirdGuy/agentform/internal/provider/providertest"
+	"github.com/weirdGuy/kastor/internal/provider"
+	"github.com/weirdGuy/kastor/internal/provider/providertest"
 )
 
 func TestFakeDiff(t *testing.T) {

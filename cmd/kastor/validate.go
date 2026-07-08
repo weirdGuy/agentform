@@ -9,15 +9,15 @@ import (
 	"github.com/hashicorp/hcl/v2"
 	"github.com/spf13/cobra"
 
-	"github.com/weirdGuy/agentform/internal/graph"
-	"github.com/weirdGuy/agentform/internal/module"
+	"github.com/weirdGuy/kastor/internal/graph"
+	"github.com/weirdGuy/kastor/internal/module"
 )
 
 func newValidateCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "validate [dir]",
 		Short: "Parse, type-check, and resolve references in a module",
-		Long:  "validate runs the full compile pipeline without producing output: parse every ADL file under the module directory, resolve cross-file references, check prompt variable satisfiability, and build the dependency graph.",
+		Long:  "validate runs the full compile pipeline without producing output: parse every Kastor file under the module directory, resolve cross-file references, check prompt variable satisfiability, and build the dependency graph.",
 		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			dir := "."

@@ -6,7 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/weirdGuy/agentform/internal/provider"
+	"github.com/weirdGuy/kastor/internal/provider"
 )
 
 func newPlanCmd() *cobra.Command {
