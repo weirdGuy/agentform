@@ -4,6 +4,23 @@ Kastor is "Terraform for AI agents." Agents today are defined imperatively insid
 
 The full design lives in [SPEC.md](SPEC.md).
 
+## Status
+
+Kastor is an early proof of concept.
+
+Working today:
+- parse `.agent`, `.tool`, `.prompt`, and `kastor.hcl`
+- validate references and prompt variables
+- build runnable LangGraph projects
+- examples: [weather agent](https://github.com/weirdGuy/kastor/tree/main/examples/weather), [content scheduler](https://github.com/weirdGuy/kastor/tree/main/examples/scheduler) agent
+
+Planned for v0:
+- `kastor plan/apply`
+- local state file and drift detection
+- Deploy to aws/azure platforms.
+
+_This is not another agent runtime/framework._
+
 ## Install
 
 Homebrew:
