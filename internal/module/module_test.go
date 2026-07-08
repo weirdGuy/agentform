@@ -7,8 +7,8 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/weirdGuy/agentform/internal/module"
-	"github.com/weirdGuy/agentform/internal/schema"
+	"github.com/weirdGuy/kastor/internal/module"
+	"github.com/weirdGuy/kastor/internal/schema"
 )
 
 func TestLoadValidModule(t *testing.T) {
@@ -81,11 +81,11 @@ func TestFiles(t *testing.T) {
 	}
 
 	// Lexical walk order; dot-directories and the codegen target output
-	// directory (gen/, from adl.hcl) are skipped. Non-ADL files are still
+	// directory (gen/, from kastor.hcl) are skipped. Non-Kastor files are still
 	// listed — callers filter by extension.
 	want := []string{
 		"README.md",
-		"adl.hcl",
+		"kastor.hcl",
 		"solo.agent",
 		"solo_system.prompt",
 		filepath.Join("sub", "search.tool"),
@@ -125,7 +125,7 @@ func TestLoadMissingDir(t *testing.T) {
 }
 
 func TestLoadRootMustBeDirectory(t *testing.T) {
-	root := filepath.Join("testdata", "valid_module", "adl.hcl")
+	root := filepath.Join("testdata", "valid_module", "kastor.hcl")
 	_, err := module.Load(root)
 	if err == nil {
 		t.Fatal("Load: expected error for file as module root")
@@ -179,10 +179,10 @@ func TestLoadErrors(t *testing.T) {
 			},
 		},
 		{
-			name: "model declared in two project files, including .adl extension",
+			name: "model declared in two project files, including .kastor extension",
 			dir:  "dup_model",
 			wantErrs: []string{
-				`model.fast: declared in both adl.hcl and extra.adl`,
+				`model.fast: declared in both extra.kastor and kastor.hcl`,
 			},
 		},
 		{

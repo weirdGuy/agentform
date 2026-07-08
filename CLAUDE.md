@@ -1,17 +1,17 @@
-# CLAUDE.md — agentform
+# CLAUDE.md — kastor
 
-Agentform is "Terraform for AI agents": a declarative HCL spec compiled to agent frameworks or reconciled against hosted platforms. **SPEC.md is the source of truth** — read it before making design decisions. If code and SPEC.md conflict, flag it; don't silently diverge.
+Kastor is "Terraform for AI agents": a declarative HCL spec compiled to agent frameworks or reconciled against hosted platforms. **SPEC.md is the source of truth** — read it before making design decisions. If code and SPEC.md conflict, flag it; don't silently diverge.
 
 ## What this is
 
-- Go CLI (`adl`) that parses `.agent`, `.tool`, `.prompt`, and `adl.hcl` project files
-- Two execution paths: `adl build` (codegen → LangGraph first) and `adl plan/apply` (platform reconciler → OpenAI Assistants first)
+- Go CLI (`kastor`) that parses `.agent`, `.tool`, `.prompt`, and `kastor.hcl` project files
+- Two execution paths: `kastor build` (codegen → LangGraph first) and `kastor plan/apply` (platform reconciler → OpenAI Assistants first)
 - Non-goals for v0: being a runtime, executing agents, eval harnesses
 
 ## Architecture
 
 ```
-cmd/adl/            CLI entrypoint (cobra)
+cmd/kastor/         CLI entrypoint (cobra)
 internal/
   parser/           HCL decode (hashicorp/hcl/v2) → AST
   schema/           typed config structs, validation
@@ -36,7 +36,7 @@ gofmt -l .                     # formatting check (must be clean)
 
 - Go 1.22+, standard library first; approved deps: cobra, hashicorp/hcl/v2, go-cmp (tests)
 - All packages under `internal/` except `cmd/`; no public API surface in v0
-- Errors: wrap with `fmt.Errorf("context: %w", err)`; user-facing CLI errors must reference the file/block address that caused them (e.g. `agent.weather: unknown reference model.fastt`)
+- Errors: wrap with `fmt.Errorf("context: %w", err)`; every user-facing diagnostic states what was found, what was expected, and where — file:line plus block address (e.g. `agent.weather: unknown reference model.fastt`)
 - Table-driven tests; fixtures live in `testdata/` per package (valid + invalid HCL samples)
 - Every parser/validation feature needs at least one negative test (bad input → expected diagnostic)
 - Providers implement the common interface: `Read / Create / Update / Delete / Diff`
@@ -54,5 +54,6 @@ gofmt -l .                     # formatting check (must be clean)
 
 - Small PRs mapped to GitHub issues; reference issue number in commits
 - Never commit directly to main; always branch (`feat/<issue>-<slug>`) + PR
-- `adl validate` must stay fast — it runs on every save in editor integrations later
+- `kastor validate` must stay fast — it runs on every save in editor integrations later
 - When adding a block field: update schema struct → validation → parser test fixtures → SPEC.md if it's a design change
+- Before claiming a milestone or feature is code complete, attempt its acceptance command (e.g. `kastor validate` / `kastor build` on the examples) and confirm the output — passing tests alone don't count

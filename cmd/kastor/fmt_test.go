@@ -12,7 +12,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-// runFmtCmd executes "adl fmt <args>" and returns combined output and the
+// runFmtCmd executes "kastor fmt <args>" and returns combined output and the
 // execution error, mirroring runValidateCmd.
 func runFmtCmd(t *testing.T, args ...string) (string, error) {
 	t.Helper()
@@ -23,7 +23,7 @@ func runFmtCmd(t *testing.T, args ...string) (string, error) {
 	cmd.SetArgs(append([]string{"fmt"}, args...))
 	err := cmd.Execute()
 	if err != nil {
-		fmt.Fprintf(&out, "adl: %v\n", err)
+		fmt.Fprintf(&out, "kastor: %v\n", err)
 	}
 	return out.String(), err
 }
@@ -94,7 +94,7 @@ func TestFmtCommand(t *testing.T) {
 			name:    "rewrites files in place and prints their names",
 			src:     "messy/before",
 			want:    "messy/after",
-			wantOut: []string{"adl.hcl", "solo.agent", "tools.tool"},
+			wantOut: []string{"kastor.hcl", "solo.agent", "tools.tool"},
 			skipOut: []string{"clean.tool", "solo_system.prompt", "leftover"},
 		},
 		{
@@ -110,7 +110,7 @@ func TestFmtCommand(t *testing.T) {
 			src:     "messy/after",
 			want:    "messy/after",
 			flags:   []string{"--check"},
-			skipOut: []string{"solo.agent", "adl.hcl", "tools.tool"},
+			skipOut: []string{"solo.agent", "kastor.hcl", "tools.tool"},
 		},
 		{
 			name:  "diff prints unified diffs and still writes",
@@ -130,7 +130,7 @@ func TestFmtCommand(t *testing.T) {
 			want:    "messy/before",
 			flags:   []string{"--check", "--diff"},
 			wantErr: true,
-			wantOut: []string{"--- a/adl.hcl", "+++ b/adl.hcl"},
+			wantOut: []string{"--- a/kastor.hcl", "+++ b/kastor.hcl"},
 		},
 		{
 			name:    "syntax errors are reported and other files still format",

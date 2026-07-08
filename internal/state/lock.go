@@ -13,7 +13,7 @@ import (
 // LockFilename is the local lock file guarding the state file. It is
 // hidden so the module walker never treats it as module input. Remote
 // state backends (and their locking) are deferred per SPEC.md §7.
-const LockFilename = ".adl.state.lock"
+const LockFilename = ".kastor.state.lock"
 
 // lockInfo is the lock file payload — purely informational, for the
 // contention error message.
@@ -67,5 +67,5 @@ func contentionError(path string) error {
 			holder = fmt.Sprintf(" (held by pid %d since %s)", info.PID, info.Created)
 		}
 	}
-	return fmt.Errorf("state is locked by another adl process%s: if that process is no longer running, delete %s", holder, path)
+	return fmt.Errorf("state is locked by another kastor process%s: if that process is no longer running, delete %s", holder, path)
 }

@@ -12,7 +12,7 @@ import (
 	"reflect"
 	"sort"
 
-	"github.com/weirdGuy/agentform/internal/provider"
+	"github.com/weirdGuy/kastor/internal/provider"
 )
 
 // Fake is an in-memory provider.Provider. Zero-configuration tests just

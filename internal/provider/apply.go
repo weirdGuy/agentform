@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/weirdGuy/agentform/internal/state"
+	"github.com/weirdGuy/kastor/internal/state"
 )
 
 // ApplyError reports the change that stopped an apply. Everything before

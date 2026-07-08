@@ -6,15 +6,15 @@ import (
 	"io"
 	"sort"
 
-	"github.com/weirdGuy/agentform/internal/module"
-	"github.com/weirdGuy/agentform/internal/provider"
-	"github.com/weirdGuy/agentform/internal/schema"
-	"github.com/weirdGuy/agentform/internal/state"
+	"github.com/weirdGuy/kastor/internal/module"
+	"github.com/weirdGuy/kastor/internal/provider"
+	"github.com/weirdGuy/kastor/internal/schema"
+	"github.com/weirdGuy/kastor/internal/state"
 )
 
 // providerFactories maps a platform target's name to its provider factory:
 // the target label doubles as the provider selector, exactly like codegen
-// target names select generators (see cmd/adl/build.go). Issue #16
+// target names select generators (see cmd/kastor/build.go). Issue #16
 // registers "openai_assistants" here.
 var providerFactories = map[string]func(*schema.Target) (provider.Provider, error){}
 
@@ -69,7 +69,7 @@ func preparePlatform(stderr io.Writer, dir, targetName string) (jobs []*platform
 
 // selectPlatformTargets picks the platform targets to reconcile: the named
 // one, or all of them in lexicographic name order when no name is given.
-// Selection failures are usage errors (exit 2), mirroring adl build.
+// Selection failures are usage errors (exit 2), mirroring kastor build.
 func selectPlatformTargets(mod *module.Module, name string) ([]*schema.Target, error) {
 	if name != "" {
 		for _, tgt := range mod.Targets {
@@ -77,7 +77,7 @@ func selectPlatformTargets(mod *module.Module, name string) ([]*schema.Target, e
 				continue
 			}
 			if tgt.Type != "platform" {
-				return nil, usageErrorf("target.%s is a %s target; adl plan/apply only reconcile platform targets — use adl build for it", name, tgt.Type)
+				return nil, usageErrorf("target.%s is a %s target; kastor plan/apply only reconcile platform targets — use kastor build for it", name, tgt.Type)
 			}
 			return []*schema.Target{tgt}, nil
 		}
@@ -91,7 +91,7 @@ func selectPlatformTargets(mod *module.Module, name string) ([]*schema.Target, e
 		}
 	}
 	if len(targets) == 0 {
-		return nil, usageErrorf("module declares no platform targets; adl plan/apply need at least one target with type = \"platform\"")
+		return nil, usageErrorf("module declares no platform targets; kastor plan/apply need at least one target with type = \"platform\"")
 	}
 	sort.Slice(targets, func(i, j int) bool { return targets[i].Name < targets[j].Name })
 	return targets, nil
@@ -200,6 +200,6 @@ func renderValue(v any) string {
 // a warning — the command's real result must not be masked by it.
 func releaseAndWarn(stderr io.Writer, release func() error) {
 	if err := release(); err != nil {
-		fmt.Fprintf(stderr, "adl: warning: %v\n", err)
+		fmt.Fprintf(stderr, "kastor: warning: %v\n", err)
 	}
 }

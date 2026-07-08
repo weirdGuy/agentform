@@ -1,6 +1,6 @@
-// Package state owns the adl.state.json file (SPEC.md §5): the record of
+// Package state owns the kastor.state.json file (SPEC.md §5): the record of
 // which remote resource each block address maps to and the configuration
-// last applied to it, used by adl plan/apply for three-way comparison and
+// last applied to it, used by kastor plan/apply for three-way comparison and
 // drift detection.
 //
 // Determinism guarantee: writing equal logical state always produces
@@ -18,13 +18,13 @@ import (
 	"path/filepath"
 )
 
-// Version is the state file format version this adl reads and writes.
+// Version is the state file format version this kastor reads and writes.
 // Load rejects any other version rather than misinterpreting it (the same
 // stance SPEC.md §9 takes on language versioning).
 const Version = 1
 
 // Filename is the state file's name, fixed at the module root.
-const Filename = "adl.state.json"
+const Filename = "kastor.state.json"
 
 // File is the decoded state file. Serial increases by one on every Write,
 // so any two snapshots of the same module's state are ordered.
@@ -67,7 +67,7 @@ func Load(dir string) (*File, error) {
 		return nil, fmt.Errorf("%s: parsing state file: %w", path, err)
 	}
 	if f.Version != Version {
-		return nil, fmt.Errorf("%s: state file version %d is not supported by this adl (supports version %d)", path, f.Version, Version)
+		return nil, fmt.Errorf("%s: state file version %d is not supported by this kastor (supports version %d)", path, f.Version, Version)
 	}
 	if f.Targets == nil {
 		f.Targets = map[string]*TargetState{}

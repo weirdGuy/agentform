@@ -1,4 +1,4 @@
-// Package module loads every ADL file in a directory tree into one module
+// Package module loads every Kastor file in a directory tree into one module
 // (SPEC.md §2), builds the module-wide symbol table, and resolves all
 // captured references against it. Reference shapes and kinds are validated
 // at parse time; this pass only checks that every target exists.
@@ -14,11 +14,11 @@ import (
 
 	"github.com/hashicorp/hcl/v2"
 
-	"github.com/weirdGuy/agentform/internal/parser"
-	"github.com/weirdGuy/agentform/internal/schema"
+	"github.com/weirdGuy/kastor/internal/parser"
+	"github.com/weirdGuy/kastor/internal/schema"
 )
 
-// Module is a fully loaded and reference-resolved directory tree of ADL
+// Module is a fully loaded and reference-resolved directory tree of Kastor
 // files. Block slices follow lexical file order, source order within a file,
 // so downstream output stays deterministic.
 type Module struct {
@@ -46,8 +46,8 @@ func (m *Module) Lookup(addr string) (*Symbol, bool) {
 	return sym, ok
 }
 
-// Load parses every ADL file in the module rooted at root (.agent, .tool,
-// .prompt, .adl, adl.hcl — discovered via Files) and resolves all
+// Load parses every Kastor file in the module rooted at root (.agent, .tool,
+// .prompt, .kastor, kastor.hcl — discovered via Files) and resolves all
 // references. All errors — parse failures, cross-file duplicate addresses,
 // unknown references — are collected and returned joined, so one run
 // reports everything.
@@ -78,7 +78,7 @@ func Load(root string) (*Module, error) {
 // paths of every file that belongs to the module, in lexical walk order.
 // Hidden (dot-prefixed) files and directories are skipped, as are the
 // output directories of codegen targets declared in the module's project
-// files — generated code is never module input. Non-ADL files are
+// files — generated code is never module input. Non-Kastor files are
 // included; callers filter by extension.
 func Files(root string) ([]string, error) {
 	info, err := os.Stat(root)
@@ -166,12 +166,12 @@ func outputDirs(root string) (map[string]bool, error) {
 	return dirs, nil
 }
 
-// isProjectFile reports whether path is a project file (adl.hcl or *.adl).
+// isProjectFile reports whether path is a project file (kastor.hcl or *.kastor).
 func isProjectFile(path string) bool {
-	return filepath.Ext(path) == ".adl" || filepath.Base(path) == "adl.hcl"
+	return filepath.Ext(path) == ".kastor" || filepath.Base(path) == "kastor.hcl"
 }
 
-// loadFile parses one ADL file (dispatched on its name) and registers its
+// loadFile parses one Kastor file (dispatched on its name) and registers its
 // blocks. Files with other extensions are ignored. A duplicate address skips
 // that block but keeps registering the rest of the file.
 func (m *Module) loadFile(path, rel string) []error {
@@ -214,7 +214,7 @@ func (m *Module) loadFile(path, rel string) []error {
 		if define("prompt", prompt.Addr(), prompt) {
 			m.Prompts = append(m.Prompts, prompt)
 		}
-	case ".adl", ".hcl":
+	case ".kastor", ".hcl":
 		if !isProjectFile(path) {
 			return nil
 		}

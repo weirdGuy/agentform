@@ -8,13 +8,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/weirdGuy/agentform/internal/provider"
-	"github.com/weirdGuy/agentform/internal/provider/providertest"
-	"github.com/weirdGuy/agentform/internal/schema"
-	"github.com/weirdGuy/agentform/internal/state"
+	"github.com/weirdGuy/kastor/internal/provider"
+	"github.com/weirdGuy/kastor/internal/provider/providertest"
+	"github.com/weirdGuy/kastor/internal/schema"
+	"github.com/weirdGuy/kastor/internal/state"
 )
 
-// runCLI executes "adl <args>" and returns combined output and the
+// runCLI executes "kastor <args>" and returns combined output and the
 // execution error, mirroring runBuildCmd.
 func runCLI(t *testing.T, args ...string) (string, error) {
 	t.Helper()
@@ -25,7 +25,7 @@ func runCLI(t *testing.T, args ...string) (string, error) {
 	cmd.SetArgs(args)
 	err := cmd.Execute()
 	if err != nil {
-		fmt.Fprintf(&out, "adl: %v\n", err)
+		fmt.Fprintf(&out, "kastor: %v\n", err)
 	}
 	return out.String(), err
 }
@@ -107,7 +107,7 @@ func TestPlanApplyDestroyEndToEnd(t *testing.T) {
 		"~ agent.",
 		`model.id: "tampered" → "gpt-4o-mini"`,
 		"Warning:",
-		"changed outside adl",
+		"changed outside kastor",
 		"changed attributes: model.id",
 		"Plan for target.fake: 0 to create, 1 to update, 0 to delete, 1 unchanged.",
 	} {
@@ -170,11 +170,11 @@ func TestPlatformCommandErrors(t *testing.T) {
 		wantOut  []string
 	}{
 		{
-			name:     "codegen target directs to adl build",
+			name:     "codegen target directs to kastor build",
 			args:     []string{"plan", "--target", "langgraph"},
 			dir:      "testdata/valid",
 			wantCode: 2,
-			wantOut:  []string{"target.langgraph", "codegen", "adl build"},
+			wantOut:  []string{"target.langgraph", "codegen", "kastor build"},
 		},
 		{
 			name:     "unknown target is a usage error",

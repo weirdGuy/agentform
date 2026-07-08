@@ -7,7 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/weirdGuy/agentform/internal/provider"
+	"github.com/weirdGuy/kastor/internal/provider"
 )
 
 func newApplyCmd() *cobra.Command {
@@ -15,7 +15,7 @@ func newApplyCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "apply [--target name] [dir]",
 		Short: "Reconcile platform targets and update the state file",
-		Long:  "apply plans each platform target (exactly like adl plan) and then executes the changes: create, update, and delete remote resources until the platform matches the spec. State is saved after every completed operation, so an interrupted apply loses nothing — re-running plans only the remainder. apply does not prompt for confirmation in v0.",
+		Long:  "apply plans each platform target (exactly like kastor plan) and then executes the changes: create, update, and delete remote resources until the platform matches the spec. State is saved after every completed operation, so an interrupted apply loses nothing — re-running plans only the remainder. apply does not prompt for confirmation in v0.",
 		Args:  usageMaxArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			dir := "."

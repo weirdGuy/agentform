@@ -19,7 +19,7 @@ var pyKeywords = map[string]bool{
 	"return": true, "try": true, "while": true, "with": true, "yield": true,
 }
 
-// pyIdent maps an ADL name to a valid Python identifier: characters outside
+// pyIdent maps an Kastor name to a valid Python identifier: characters outside
 // [A-Za-z0-9_] become underscores, a leading digit gets an underscore
 // prefix, and Python keywords get an underscore suffix.
 func pyIdent(name string) string {
@@ -99,7 +99,7 @@ func pyLiteral(v any) (string, error) {
 	return "", fmt.Errorf("unsupported literal %v (%T)", v, v)
 }
 
-// pyType maps an ADL type keyword to its Python type hint.
+// pyType maps an Kastor type keyword to its Python type hint.
 func pyType(t string) string {
 	switch t {
 	case "string":
@@ -115,7 +115,7 @@ func pyType(t string) string {
 // pyParam is one parameter of a generated function signature.
 type pyParam struct {
 	name   string // python identifier
-	source string // original ADL name, used for dict keys and diagnostics
+	source string // original Kastor name, used for dict keys and diagnostics
 	hint   string // type hint
 	def    string // default value literal; "" means required
 	doc    string // Args: line without the leading name; "" omits the entry
@@ -163,7 +163,7 @@ func docstring(indent, summary string, params []pyParam) string {
 }
 
 // argsDict renders the {"param": param, ...} literal that forwards a tool's
-// parameters, keyed by their ADL names in sorted order. indent is the
+// parameters, keyed by their Kastor names in sorted order. indent is the
 // indentation of the line the literal starts on.
 func argsDict(params []pyParam, indent string) string {
 	if len(params) == 0 {

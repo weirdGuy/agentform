@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-// runValidateCmd executes "adl validate <dir>" and returns combined output
+// runValidateCmd executes "kastor validate <dir>" and returns combined output
 // and the execution error.
 func runValidateCmd(t *testing.T, args ...string) (string, error) {
 	t.Helper()
@@ -20,7 +20,7 @@ func runValidateCmd(t *testing.T, args ...string) (string, error) {
 	// main.go prints the returned error to stderr; append it so tests see
 	// the same combined output a user does.
 	if err != nil {
-		fmt.Fprintf(&out, "adl: %v\n", err)
+		fmt.Fprintf(&out, "kastor: %v\n", err)
 	}
 	return out.String(), err
 }

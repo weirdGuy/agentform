@@ -11,9 +11,9 @@ var version = "dev"
 
 func newRootCmd() *cobra.Command {
 	root := &cobra.Command{
-		Use:           "adl",
+		Use:           "kastor",
 		Short:         "Agent Definition Language — declarative AI agent specs",
-		Long:          "adl compiles declarative agent specs (.agent, .tool, .prompt) to agent frameworks or reconciles them against hosted platforms.",
+		Long:          "kastor compiles declarative agent specs (.agent, .tool, .prompt) to agent frameworks or reconciles them against hosted platforms.",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -39,9 +39,9 @@ func newRootCmd() *cobra.Command {
 func newVersionCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "version",
-		Short: "Print the adl version",
+		Short: "Print the kastor version",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			_, err := fmt.Fprintf(cmd.OutOrStdout(), "adl version %s\n", version)
+			_, err := fmt.Fprintf(cmd.OutOrStdout(), "kastor version %s\n", version)
 			return err
 		},
 	}

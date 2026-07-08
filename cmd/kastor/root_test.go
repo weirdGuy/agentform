@@ -16,7 +16,7 @@ func TestRootCommand(t *testing.T) {
 		{
 			name:    "version subcommand prints version",
 			args:    []string{"version"},
-			wantOut: "adl version dev",
+			wantOut: "kastor version dev",
 		},
 		{
 			name:    "no args prints help",
@@ -50,7 +50,7 @@ func TestRootCommand(t *testing.T) {
 }
 
 func TestRootCommandUse(t *testing.T) {
-	if got := newRootCmd().Use; got != "adl" {
-		t.Errorf("root command Use = %q, want %q", got, "adl")
+	if got := newRootCmd().Use; got != "kastor" {
+		t.Errorf("root command Use = %q, want %q", got, "kastor")
 	}
 }

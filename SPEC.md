@@ -1,4 +1,4 @@
-# Agent Definition Language (ADL) — v0 Design Spec
+# Kastor — v0 Design Spec
  
 > Declarative language for defining, compiling, and managing AI agents.
 > "Terraform for agents": one spec → codegen for frameworks *or* lifecycle management on hosted platforms.
@@ -11,11 +11,11 @@ Status: **draft v0** · Syntax: **HCL** · Implementation: **Go**
  
 Agents today are defined imperatively inside frameworks (LangGraph, CrewAI) or clicked together in platform UIs (OpenAI Assistants, Bedrock Agents). There is no vendor-neutral, versionable, reviewable source of truth.
  
-ADL provides:
+Kastor provides:
  
 1. **A spec** — typed, declarative definitions of agents, tools, prompts, and models.
-2. **A compiler** — generate runnable projects for target frameworks (`adl build`).
-3. **A reconciler** — create/update/destroy agents on hosted platforms with plan/apply/state semantics (`adl plan`, `adl apply`).
+2. **A compiler** — generate runnable projects for target frameworks (`kastor build`).
+3. **A reconciler** — create/update/destroy agents on hosted platforms with plan/apply/state semantics (`kastor plan`, `kastor apply`).
 Non-goals (v0): being a runtime, executing agents, evaluation/testing harnesses.
  
 ---
@@ -27,7 +27,7 @@ Non-goals (v0): being a runtime, executing agents, evaluation/testing harnesses.
 | `.agent`  | Agent definition | model ref, prompt refs, tool refs, IO schema, deps |
 | `.tool`   | Tool specification | interface (params, returns) + implementation source |
 | `.prompt` | Prompt template | frontmatter (name, required variables) + raw body |
-| `.adl` / `adl.hcl` | Project file | project meta, model blocks, targets, defaults |
+| `.kastor` / `kastor.hcl` | Project file | project meta, model blocks, targets, defaults |
  
 All files in a directory tree form one **module** (like a Terraform module). Files reference each other by block address, not path.
  
@@ -168,7 +168,7 @@ tool "web_search" {
 - `kind` is a closed enum (like `target.type`): `mcp | http | builtin | runtime | script`. Unknown kinds are compile errors.
 - Exactly one `source` block and exactly one `returns` block per tool. Zero `param` blocks is fine.
 - `uri` is required for `mcp`, `http`, and `script` sources; it is an error on `builtin` and `runtime` (they have no external location — the platform or generated stub is the implementation). Meaningless fields are errors, not ignored.
-- For `mcp` sources the `uri` pins **identity only**: `mcp://<server>/<tool>` names the server and the tool on it — nothing more. Transport and connection details (command, endpoint, headers) are deployment configuration, not spec: generated projects read them at runtime from `mcp_servers.json` (langchain-mcp-adapters connection format), overridable via the `ADL_MCP_CONFIG` env var.
+- For `mcp` sources the `uri` pins **identity only**: `mcp://<server>/<tool>` names the server and the tool on it — nothing more. Transport and connection details (command, endpoint, headers) are deployment configuration, not spec: generated projects read them at runtime from `mcp_servers.json` (langchain-mcp-adapters connection format), overridable via the `KASTOR_MCP_CONFIG` env var.
 - Param and returns types are bare keywords, not strings: `type = string`, never `type = "string"`. Closed enum in v0: `string | number | bool` (compound types deferred to v1).
 - `default` must be a literal whose type matches the declared `type`; a mismatch or an explicit `default = null` is a compile error. A param with a `default` is optional at call time; there is no separate `optional` attribute on tool params.
 - `description` is optional on both the tool and its params at parse time (targets may enforce more).
@@ -201,13 +201,13 @@ No model, no IO — prompts are pure templates (per decision #2).
 Where the spec goes. Two categories mirror the two verbs:
  
 ```hcl
-# Codegen target → `adl build`
+# Codegen target → `kastor build`
 target "langgraph" {
   type   = "codegen"
   output = "./gen/langgraph"
 }
  
-# Managed platform target → `adl plan` / `adl apply`
+# Managed platform target → `kastor plan` / `kastor apply`
 target "openai_assistants" {
   type = "platform"
   auth {
@@ -237,19 +237,19 @@ target "openai_assistants" {
  
 | Command | Function |
 |---------|----------|
-| `adl init` | Scaffold project |
-| `adl validate` | Parse + type-check + resolve references |
-| `adl build [-target X]` | Codegen for framework targets |
-| `adl plan` | Diff spec vs. state file vs. remote platform |
-| `adl apply` | Reconcile platform targets, update state |
-| `adl destroy` | Remove managed remote agents |
-| `adl fmt` | Canonical formatting |
+| `kastor init` | Scaffold project |
+| `kastor validate` | Parse + type-check + resolve references |
+| `kastor build [-target X]` | Codegen for framework targets |
+| `kastor plan` | Diff spec vs. state file vs. remote platform |
+| `kastor apply` | Reconcile platform targets, update state |
+| `kastor destroy` | Remove managed remote agents |
+| `kastor fmt` | Canonical formatting |
  
 Exit codes (all commands): 0 clean, 1 validation/codegen/plan/apply errors, 2 usage/IO errors (including lock contention).
 
 ### 5.1 State file
 
-`adl.state.json`, at the module root, records what `adl apply` manages: block addresses → remote resource IDs, plus the configuration last applied to each.
+`kastor.state.json`, at the module root, records what `kastor apply` manages: block addresses → remote resource IDs, plus the configuration last applied to each.
 
 ```json
 {
@@ -277,11 +277,11 @@ Exit codes (all commands): 0 clean, 1 validation/codegen/plan/apply errors, 2 us
 - Serialization is deterministic: stable key order, byte-identical output for equal state. Writes are atomic (temp file + rename) and happen **after every applied operation**, not once at the end — an interrupted apply loses nothing, and a re-run plans exactly the remainder.
 - Like Terraform state, the file is environment-specific and is not meant to be committed.
 
-**Locking:** plan/apply/destroy take a local lock file (`.adl.state.lock`) for their duration; contention errors name the holding pid and the recovery step (delete the stale file). Remote state backends and remote locking are deferred (§7).
+**Locking:** plan/apply/destroy take a local lock file (`.kastor.state.lock`) for their duration; contention errors name the holding pid and the recovery step (delete the stale file). Remote state backends and remote locking are deferred (§7).
 
 ### 5.2 Plan/apply semantics
 
-`adl plan` is a **three-way comparison** — spec vs. state vs. remote — and a **pure read**: it issues only `Read`/`Diff` provider calls and never touches the state file.
+`kastor plan` is a **three-way comparison** — spec vs. state vs. remote — and a **pure read**: it issues only `Read`/`Diff` provider calls and never touches the state file.
 
 Per resource, in the module's topological order (deletes first, in reverse dependency order):
 
@@ -293,9 +293,9 @@ Per resource, in the module's topological order (deletes first, in reverse depen
 | in spec and state, remote matches | no-op |
 | in state, not in spec | delete ("removed from spec") |
 
-**Drift** (remote changed outside adl) is detected by diffing the *last-applied* config against the remote and reported as a warning naming the changed attributes; apply converges the remote back to the spec. When the user instead edits the spec to match a manual remote change, the plan is a no-op and apply silently refreshes the stale state entry (no remote call), so the warning does not recur.
+**Drift** (remote changed outside kastor) is detected by diffing the *last-applied* config against the remote and reported as a warning naming the changed attributes; apply converges the remote back to the spec. When the user instead edits the spec to match a manual remote change, the plan is a no-op and apply silently refreshes the stale state entry (no remote call), so the warning does not recur.
 
-`adl apply` executes the plan in order and stops at the first failure; everything applied up to that point is already saved in state, and the error states what failed, what had been applied, and — if a resource was created remotely but saving state failed — the remote id, so nothing is orphaned silently. `adl apply` does not prompt for confirmation in v0. `adl destroy` deletes everything in state in reverse dependency order.
+`kastor apply` executes the plan in order and stops at the first failure; everything applied up to that point is already saved in state, and the error states what failed, what had been applied, and — if a resource was created remotely but saving state failed — the remote id, so nothing is orphaned silently. `kastor apply` does not prompt for confirmation in v0. `kastor destroy` deletes everything in state in reverse dependency order.
 
 Diagnostics from plan/apply are structured (severity, block address, summary, detail) so a machine-readable `--json` rendering (§9) is a renderer, not a redesign.
  
@@ -304,7 +304,7 @@ Diagnostics from plan/apply are structured (severity, block address, summary, de
 ## 6. Architecture (Go)
  
 ```
-cmd/adl/            CLI (cobra)
+cmd/kastor/         CLI (cobra)
 internal/
   parser/           HCL decode (hashicorp/hcl/v2) → AST
   schema/           typed config structs, validation
@@ -323,13 +323,13 @@ Providers implement a common interface (`Read/Create/Update/Delete/Diff`) — la
 
 **Provider contract** (`internal/provider`): the engine renders each agent's closure into a neutral, serializable config (a JSON value tree — no core Go types, no provider types), so the interface can move behind a plugin boundary without redesign. Contract rules:
 
-- `Read(id)` reports found=false for a resource deleted outside adl — that is drift data, not an error.
+- `Read(id)` reports found=false for a resource deleted outside kastor — that is drift data, not an error.
 - `Create(resource)` returns the platform's id; the engine records it in state immediately.
 - `Delete(id)` is idempotent: deleting an already-missing remote object succeeds, so re-runs after partial failures converge.
 - `Diff(desired, remote)` is the comparison authority — only the provider knows how the neutral config maps onto its platform's attributes. Empty result = in sync. The engine also diffs the last-applied config against the remote for drift detection.
-- `Diff` must be pure and deterministic; `Read` must not mutate. `adl plan` issues only these two.
+- `Diff` must be pure and deterministic; `Read` must not mutate. `kastor plan` issues only these two.
 
-The plan/apply engine is target-agnostic and consumes exactly what `adl validate` assembles (loaded module, dependency graph, topological order) plus the state file — the same shape as the codegen engine's `Generate(job)` contract.
+The plan/apply engine is target-agnostic and consumes exactly what `kastor validate` assembles (loaded module, dependency graph, topological order) plus the state file — the same shape as the codegen engine's `Generate(job)` contract.
  
 ---
  
@@ -345,25 +345,25 @@ The plan/apply engine is target-agnostic and consumes exactly what `adl validate
  
 ## 8. v0 Milestones
  
-1. Parser + `adl validate` for `.agent`, `.tool`, `.prompt`, project file
-2. `adl build` with **one** codegen target (pick LangGraph)
-3. `adl plan/apply` with **one** platform provider (pick OpenAI Assistants)
+1. Parser + `kastor validate` for `.agent`, `.tool`, `.prompt`, project file
+2. `kastor build` with **one** codegen target (pick LangGraph)
+3. `kastor plan/apply` with **one** platform provider (pick OpenAI Assistants)
 4. Examples repo: the weather agent end-to-end on both paths
 One codegen target + one provider proves the hybrid thesis. Everything else is expansion.
 
 ## 9. Consumers & design constraints
 
-ADL has two consumer classes, in deliberate sequence:
+Kastor has two consumer classes, in deliberate sequence:
 
 1. **Humans (v0–v1).** Developers hand-writing specs, reading diagnostics,
-   reviewing diffs in PRs. Human ergonomics — readable HCL, `adl fmt`, clear
+   reviewing diffs in PRs. Human ergonomics — readable HCL, `kastor fmt`, clear
    error text, this document — are first-class permanently. Nothing in the
    AI-consumer direction may regress the human path.
 
 2. **AI agents as the primary consumer (v1+).** The long-term thesis: people
    build personalized agents *by instructing an AI*, and that AI expresses the
-   result as an ADL module — validated, versioned, diffable, reviewable by a
-   human. ADL is the stable, typed substrate that makes AI-built agents
+   result as a Kastor module — validated, versioned, diffable, reviewable by a
+   human. Kastor is the stable, typed substrate that makes AI-built agents
    trustworthy rather than ad hoc.
 
 Every design decision is evaluated against both consumers. Concretely, the

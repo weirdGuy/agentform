@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/weirdGuy/agentform/internal/build"
+	"github.com/weirdGuy/kastor/internal/build"
 )
 
 func write(t *testing.T, dir string, files ...build.File) {

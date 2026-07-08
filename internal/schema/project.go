@@ -1,8 +1,8 @@
-// Package schema defines the typed configuration structs that parsed ADL
+// Package schema defines the typed configuration structs that parsed Kastor
 // files decode into.
 package schema
 
-// ProjectFile is the decoded form of a project file (adl.hcl / .adl).
+// ProjectFile is the decoded form of a project file (kastor.hcl / .kastor).
 // Block order follows source order so downstream output stays deterministic.
 type ProjectFile struct {
 	Models  []*Model

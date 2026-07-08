@@ -1,10 +1,10 @@
 # Built binary
-/adl
+/kastor
 
 # Test/coverage artifacts
 *.out
 
-# Generated output: reproducible from `adl build`, deliberately not
+# Generated output: reproducible from `kastor build`, deliberately not
 # committed — codegen determinism is enforced by tests, so committed
 # artifacts are not needed to detect drift.
 examples/**/gen/
@@ -13,8 +13,8 @@ examples/**/gen/
 # environment-specific like tfstate, never committed. The lock file is
 # transient by design. (State-package test fixtures live in tracked
 # testdata directories and are unaffected by these example-scoped rules.)
-examples/**/adl.state.json
-examples/**/.adl.state.lock
+examples/**/kastor.state.json
+examples/**/.kastor.state.lock
 
 # MCP server connection config: can carry API keys in URLs (hosted
 # endpoints like Tavily embed the key as a query param). Must never be
