@@ -111,3 +111,13 @@ go test ./...    # run all tests
 ```
 
 SPEC.md is the source of truth for design decisions; CLAUDE.md documents the day-to-day conventions.
+
+## Early feedback
+
+I'm currently looking for feedback from people building agents in production or experimenting with agent tooling.
+
+If you want to follow the project or discuss the design:
+
+- Star/watch the repo for updates
+- Open an issue for bugs or design feedback
+- Join the early Discord: [invite](https://discord.gg/bb4UwtJFe)
