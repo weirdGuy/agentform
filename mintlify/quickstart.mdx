@@ -9,8 +9,8 @@ It validates the weather example, generates LangGraph code, and shows the platfo
 
 ## Prerequisites
 
-- Go 1.26+
-- Python 3.11+ if you want to run generated LangGraph code
+- Go 1.26\+
+- Python 3.11\+ if you want to run generated LangGraph code
 - An OpenAI API key if you want the generated weather agent to call the configured `openai` model
 - A Tavily API key if you want to run the example MCP web-search tool against Tavily
 
@@ -27,13 +27,11 @@ It validates the weather example, generates LangGraph code, and shows the platfo
     cd kastor
     ```
   </Step>
-
   <Step title="Build the binary">
     ```bash
     go build -o kastor ./cmd/kastor
     ```
   </Step>
-
   <Step title="Check the command">
     ```bash
     ./kastor version
@@ -159,10 +157,3 @@ Planned for v0:
 <Warning>
   There is no implemented `kastor compile` command. The current compiler command is `kastor build`.
 </Warning>
-</Steps>
-
-<Tip>
-  Give people a way to get help. This could be a link to a support page, a chat with a customer support agent, or a forum for your product.
-
-  Example: Need help? Reach out to us at [support@yourcompany.com](mailto:support@yourcompany.com).
-</Tip>
