@@ -7,6 +7,13 @@
     "light": "#38BDF8",
     "dark": "#1D4ED8"
   },
+  "integrations": {
+    "posthog": {
+      "apiKey": "phc_u9ss8M5REuWzq5mXR3V8PbdTxwHut8qBGLFKxAygnyEk",
+      "apiHost": "https://p.getkastor.dev",
+      "sessionRecording": false
+    }
+  },
   "favicon": "/favicon.svg",
   "navigation": {
     "groups": [
