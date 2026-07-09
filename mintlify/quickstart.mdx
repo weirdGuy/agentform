@@ -1,0 +1,168 @@
+---
+title: "Quickstart"
+description: "Build Kastor from source and run the weather example."
+---
+
+This quickstart uses the repository source build because it is the most reliable path while Kastor is early.
+
+It validates the weather example, generates LangGraph code, and shows the platform lifecycle using the built-in in-memory provider.
+
+## Prerequisites
+
+- Go 1.26+
+- Python 3.11+ if you want to run generated LangGraph code
+- An OpenAI API key if you want the generated weather agent to call the configured `openai` model
+- A Tavily API key if you want to run the example MCP web-search tool against Tavily
+
+<Note>
+  The docs below do not assume Homebrew, npm, or another package-manager install. If a release package exists for your platform, the repository README may document it separately.
+</Note>
+
+## Build the CLI
+
+<Steps>
+  <Step title="Clone the repository">
+    ```bash
+    git clone https://github.com/weirdGuy/kastor.git
+    cd kastor
+    ```
+  </Step>
+
+  <Step title="Build the binary">
+    ```bash
+    go build -o kastor ./cmd/kastor
+    ```
+  </Step>
+
+  <Step title="Check the command">
+    ```bash
+    ./kastor version
+    ```
+  </Step>
+</Steps>
+
+## Validate the weather module
+
+The example lives in `examples/weather`.
+
+```bash
+./kastor validate examples/weather
+```
+
+Expected shape:
+
+```console
+Success! Module is valid: 3 agents, 1 tool, 2 prompts, 1 model, 2 targets.
+```
+
+Validation parses every Kastor file, resolves references, checks prompt variables against agent inputs and outputs, and builds the dependency graph.
+
+## Build LangGraph code
+
+```bash
+./kastor build examples/weather
+```
+
+The implemented codegen command is `build`. It writes generated LangGraph files to the `output` declared by `target "langgraph"` in `examples/weather/kastor.hcl`.
+
+```hcl
+target "langgraph" {
+  type   = "codegen"
+  output = "./gen/langgraph"
+}
+```
+
+Generated code is an output. The Kastor module remains the source of truth.
+
+To run the generated project:
+
+```bash
+cd examples/weather/gen/langgraph
+python3 -m venv .venv
+. .venv/bin/activate
+pip install -r requirements.txt
+export OPENAI_API_KEY=YOUR-OPENAI-API-KEY
+python3 main.py weather --inputs '{"location": "Lisbon", "date": "tomorrow"}'
+```
+
+The weather tool is declared as an MCP tool. The generated project reads MCP server connection details from `mcp_servers.json` in the working directory or from the path in `KASTOR_MCP_CONFIG`.
+
+Use a placeholder-shaped config like this and keep the real file out of version control:
+
+```json
+{
+  "search-server": {
+    "transport": "streamable_http",
+    "url": "https://mcp.tavily.com/mcp/?tavilyApiKey=YOUR-TAVILY-KEY"
+  }
+}
+```
+
+## Plan and apply
+
+The weather example also includes a platform target:
+
+```hcl
+target "memory" {
+  type = "platform"
+}
+```
+
+`memory` is implemented today. It is an in-process provider for demos, tests, and onboarding. It does not create hosted resources and does not require credentials.
+
+```bash
+./kastor plan examples/weather
+```
+
+Expected first plan:
+
+```console
+  + agent.forecast (not in state)
+  + agent.geocoder (not in state)
+  + agent.weather (not in state)
+
+Plan for target.memory: 3 to create, 0 to update, 0 to delete, 0 unchanged.
+```
+
+Apply the plan:
+
+```bash
+./kastor apply examples/weather
+```
+
+Kastor writes `kastor.state.json` in the module root. Like Terraform state, it is environment-specific and should not be committed.
+
+Because the `memory` platform is ephemeral, a later CLI invocation cannot read the previous in-memory objects. A future `plan` may report remote-missing drift and recreate them. That is expected for this provider.
+
+## Intended v0 workflow
+
+The intended workflow is:
+
+```bash
+kastor validate <module>
+kastor build <module>
+kastor plan <module>
+kastor apply <module>
+```
+
+Implemented today:
+
+- `validate`
+- `build` for LangGraph
+- `plan` / `apply` / `destroy` for `target "memory"`
+
+Planned for v0:
+
+- a hosted platform provider
+- a fully documented end-to-end hosted weather-agent example
+
+<Warning>
+  There is no implemented `kastor compile` command. The current compiler command is `kastor build`.
+</Warning>
+</Steps>
+
+<Tip>
+  Give people a way to get help. This could be a link to a support page, a chat with a customer support agent, or a forum for your product.
+
+  Example: Need help? Reach out to us at [support@yourcompany.com](mailto:support@yourcompany.com).
+</Tip>

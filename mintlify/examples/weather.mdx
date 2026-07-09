@@ -1,0 +1,232 @@
+---
+title: "Weather example"
+description: "The canonical Kastor example module."
+---
+
+The weather example is the first complete example to read.
+
+It lives in `examples/weather` and contains:
+
+```text
+kastor.hcl
+weather.agent
+forecast.agent
+geocoder.agent
+web_search.tool
+weather_system.prompt
+forecast_system.prompt
+```
+
+The module declares three agents, one tool, two prompts, one model, one LangGraph codegen target, and one in-memory platform target.
+
+## Project file
+
+`kastor.hcl` declares the shared model and targets.
+
+```hcl
+model "fast" {
+  provider = "openai"
+  id       = "gpt-4o-mini"
+
+  params {
+    temperature = 0.2
+    max_tokens  = 4096
+  }
+}
+
+target "langgraph" {
+  type   = "codegen"
+  output = "./gen/langgraph"
+}
+
+target "memory" {
+  type = "platform"
+}
+```
+
+`target "langgraph"` is for `kastor build`. `target "memory"` is for `kastor plan` and `kastor apply`.
+
+## Weather agent
+
+`weather.agent` is the user-facing agent.
+
+```hcl
+agent "weather" {
+  description = "Answers weather questions for a location and date"
+
+  model         = model.fast
+  system_prompt = prompt.weather_system
+
+  tools = [tool.web_search]
+
+  input "location" {
+    type        = string
+    description = "The location to get the weather for"
+  }
+
+  input "date" {
+    type     = string
+    optional = true
+  }
+
+  input "forecast_context" {
+    type    = string
+    default = agent.forecast.output.summary
+  }
+
+  output "weather" {
+    type = string
+  }
+
+  depends_on = [agent.geocoder]
+}
+```
+
+Important details:
+
+- `model.fast` comes from `kastor.hcl`.
+- `prompt.weather_system` comes from `weather_system.prompt`.
+- `tool.web_search` comes from `web_search.tool`.
+- `agent.forecast.output.summary` creates an inferred dependency.
+- `depends_on = [agent.geocoder]` creates an explicit ordering dependency.
+
+The cross-agent default is validated and orders the graph. Current v0 codegen does not automatically run `agent.forecast` and pass the result into `agent.weather`.
+
+## Forecast agent
+
+`forecast.agent` produces a short forecast summary.
+
+```hcl
+agent "forecast" {
+  description = "Produces a short forecast summary for a location"
+
+  model         = model.fast
+  system_prompt = prompt.forecast_system
+
+  input "location" {
+    type = string
+  }
+
+  output "summary" {
+    type = string
+  }
+}
+```
+
+This gives the weather agent a real upstream dependency to reference.
+
+## Geocoder agent
+
+`geocoder.agent` intentionally omits `system_prompt`.
+
+```hcl
+agent "geocoder" {
+  description = "Resolves place names to coordinates"
+
+  model = model.fast
+
+  input "location" {
+    type = string
+  }
+
+  output "coordinates" {
+    type = string
+  }
+}
+```
+
+This is valid. When an agent has no system prompt, prompt-variable validation is a no-op for that agent.
+
+## Web search tool
+
+`web_search.tool` declares an MCP-backed tool.
+
+```hcl
+tool "web_search" {
+  description = "Search the web"
+
+  param "query" {
+    type        = string
+    description = "The query to search for"
+  }
+
+  param "max_results" {
+    type    = number
+    default = 10
+  }
+
+  param "include_images" {
+    type    = bool
+    default = false
+  }
+
+  returns {
+    type = string
+  }
+
+  source {
+    kind = "mcp"
+    uri  = "mcp://search-server/tavily_search"
+  }
+}
+```
+
+The spec pins the server name and tool name. Transport details and secrets belong in runtime configuration, not in the Kastor spec.
+
+## Prompt files
+
+`weather_system.prompt`:
+
+```text
+---
+name     = "weather_system"
+requires = ["location", "forecast_context"]
+---
+You are a weather assistant. The user is asking about {{location}}.
+
+Existing forecast context, if any:
+{{forecast_context}}
+
+Answer concisely using the provided tools.
+```
+
+`forecast_system.prompt`:
+
+```text
+---
+name = "forecast_system"
+---
+Produce a one-paragraph weather forecast summary for {{location}}.
+```
+
+The forecast prompt omits `requires`, so Kastor infers `location` from the body.
+
+## Run the example
+
+```bash
+go build -o kastor ./cmd/kastor
+./kastor validate examples/weather
+./kastor build examples/weather
+./kastor plan examples/weather
+```
+
+`build` writes generated LangGraph code to `examples/weather/gen/langgraph`.
+
+`plan` uses the `memory` provider, so it does not create hosted resources.
+
+## Runtime credentials
+
+To run the generated LangGraph project, set `OPENAI_API_KEY`.
+
+For the MCP search tool, provide `mcp_servers.json` in the generated project directory or set `KASTOR_MCP_CONFIG` to another path.
+
+```json
+{
+  "search-server": {
+    "transport": "streamable_http",
+    "url": "https://mcp.tavily.com/mcp/?tavilyApiKey=YOUR-TAVILY-KEY"
+  }
+}
+```
+
+Keep real API keys out of the repository.

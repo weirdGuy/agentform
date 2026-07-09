@@ -1,0 +1,83 @@
+---
+title: "Introduction"
+description: "Kastor is a declarative source-of-truth layer for AI agents."
+---
+
+Kastor is an open-source language and CLI for declarative agent definitions.
+
+You write agents, tools, prompts, models, and targets in HCL. Kastor validates the module, builds framework code, and reconciles platform agents with a Terraform-style lifecycle.
+
+The source of truth is the Kastor module, not generated code and not a manually configured platform UI.
+
+```text
+.agent + .tool + .prompt + kastor.hcl
+                |
+                v
+        kastor validate
+                |
+      +---------+---------+
+      v                   v
+kastor build        kastor plan/apply
+framework code      platform resources
+```
+
+## Why declarative agent definitions matter
+
+Agent systems usually spread their contract across framework code, prompt files, tool implementations, model settings, platform configuration, and deployment notes.
+
+Kastor pulls the contract into reviewable files:
+
+- what agents exist
+- which model each agent uses
+- which prompts and tools are attached
+- what inputs and outputs are expected
+- which targets should receive the definition
+- which resources depend on each other
+
+That shape makes agent changes easier to review in pull requests and easier to reproduce from source.
+
+## Compiler plus lifecycle manager
+
+Kastor has two paths:
+
+- `kastor build` compiles a module into runnable framework code. LangGraph is the implemented first codegen target.
+- `kastor plan` and `kastor apply` reconcile platform targets using state, diffs, and dependency ordering. The built-in `memory` provider works today for local demos and tests. Hosted providers are planned for v0.
+
+The mental model is similar to Terraform, but Kastor starts one layer earlier: the agent definition itself.
+
+## Current status
+
+Kastor is an early proof of concept.
+
+Implemented or prototyped today:
+
+- parsing `.agent`, `.tool`, `.prompt`, `kastor.hcl`, and `*.kastor`
+- `kastor validate`
+- `kastor build` for LangGraph
+- `kastor plan`, `kastor apply`, and `kastor destroy` for the built-in in-memory platform
+- local `kastor.state.json` state for platform targets
+- canonical formatting with `kastor fmt`
+- weather and scheduler examples
+
+Planned for v0:
+
+- one hosted platform provider
+- a complete end-to-end weather-agent path across codegen and platform reconciliation
+- tighter first-run packaging and docs
+
+## What Kastor is not
+
+Kastor is not an agent runtime. LangGraph, hosted platforms, or your own application still execute agents.
+
+Kastor is not a visual builder. It is a file-based source-of-truth layer for people who want versioned, diffable agent definitions.
+
+Kastor is not trying to standardize every part of agent behavior in v0. Memory, guardrails, orchestration graphs, and module registries are deferred ideas.
+
+<CardGroup cols={2}>
+  <Card title="Quickstart" icon="terminal" href="/quickstart">
+    Build Kastor from source, validate the weather example, and inspect the Terraform-style plan flow.
+  </Card>
+  <Card title="Weather example" icon="cloud-sun" href="/examples/weather">
+    Read the canonical example module and what each block does.
+  </Card>
+</CardGroup>

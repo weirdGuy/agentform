@@ -1,0 +1,148 @@
+---
+title: "CLI reference"
+description: "Implemented Kastor commands and planned CLI surface."
+---
+
+The current CLI command is `kastor`.
+
+```bash
+kastor <command> [flags] [dir]
+```
+
+Most commands default to the current directory when `[dir]` is omitted.
+
+## `kastor validate`
+
+Parse, type-check, resolve references, check prompt variables, and build the dependency graph.
+
+```bash
+kastor validate [dir]
+```
+
+Example:
+
+```bash
+kastor validate examples/weather
+```
+
+This command produces no generated files and does not touch state.
+
+## `kastor build`
+
+Generate framework code from codegen targets.
+
+```bash
+kastor build [--target name] [dir]
+```
+
+Examples:
+
+```bash
+kastor build examples/weather
+kastor build --target langgraph examples/weather
+```
+
+Implemented target:
+
+| Target label | Status |
+| --- | --- |
+| `langgraph` | Implemented. Generates a Python LangGraph project. |
+
+There is no implemented `kastor compile` command. Use `kastor build`.
+
+## `kastor plan`
+
+Compare the spec, state file, and remote platform for platform targets.
+
+```bash
+kastor plan [--target name] [dir]
+```
+
+Example:
+
+```bash
+kastor plan examples/weather
+```
+
+`plan` is a pure read. It should not modify remote resources or write the state file.
+
+Implemented provider:
+
+| Target label | Status |
+| --- | --- |
+| `memory` | Implemented. Ephemeral in-memory provider for local demos and tests. |
+
+Planned provider:
+
+| Target label | Status |
+| --- | --- |
+| `openai_assistants` | Planned for v0. Not registered in the current CLI. |
+
+## `kastor apply`
+
+Plan and reconcile platform targets.
+
+```bash
+kastor apply [--target name] [dir]
+```
+
+Example:
+
+```bash
+kastor apply --target memory examples/weather
+```
+
+`apply` does not prompt for confirmation in v0. State is saved after completed operations.
+
+## `kastor destroy`
+
+Delete all resources tracked in state for selected platform targets.
+
+```bash
+kastor destroy [--target name] [dir]
+```
+
+`destroy` deletes resources in reverse dependency order and updates state after each deletion.
+
+## `kastor fmt`
+
+Canonically format Kastor HCL files.
+
+```bash
+kastor fmt [--check] [--diff] [dir]
+```
+
+Files formatted:
+
+- `.agent`
+- `.tool`
+- `.kastor`
+- `kastor.hcl`
+
+Prompt files are left untouched because the body is preserved byte for byte.
+
+## `kastor version`
+
+Print the CLI version.
+
+```bash
+kastor version
+```
+
+## Planned or deferred commands and flags
+
+| Surface | Status |
+| --- | --- |
+| `kastor init` | Listed in the design spec, not implemented in the current CLI. |
+| `--json` output | Described as a design direction for structured diagnostics and plans, not implemented in the current CLI. |
+| `kastor compile` | Not part of the current CLI. Use `kastor build`. |
+
+## Exit codes
+
+The design spec defines:
+
+| Code | Meaning |
+| --- | --- |
+| `0` | Clean run. |
+| `1` | Validation, codegen, plan, or apply error. |
+| `2` | Usage or IO error, including state lock contention. |
