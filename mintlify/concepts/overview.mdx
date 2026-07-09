@@ -1,0 +1,156 @@
+---
+title: "Core concepts"
+description: "The pieces that make up a Kastor module."
+---
+
+A Kastor module is a directory tree of `.agent`, `.tool`, `.prompt`, and project files. Files reference blocks by address, not by path.
+
+```text
+agent.weather
+tool.web_search
+prompt.weather_system
+model.fast
+target.langgraph
+```
+
+## Agents
+
+An agent owns its model, tools, optional system prompt, input contract, output contract, and dependency hints.
+
+```hcl
+agent "weather" {
+  model         = model.fast
+  system_prompt = prompt.weather_system
+  tools         = [tool.web_search]
+
+  input "location" {
+    type = string
+  }
+
+  output "weather" {
+    type = string
+  }
+}
+```
+
+The current type set is intentionally small: `string`, `number`, and `bool`.
+
+## Tools
+
+A tool is an interface plus an implementation source.
+
+```hcl
+tool "web_search" {
+  description = "Search the web"
+
+  param "query" {
+    type = string
+  }
+
+  returns {
+    type = string
+  }
+
+  source {
+    kind = "mcp"
+    uri  = "mcp://search-server/tavily_search"
+  }
+}
+```
+
+Implemented parser support includes `mcp`, `http`, `builtin`, `runtime`, and `script` source kinds. LangGraph codegen supports `mcp`, `http`, and `runtime`; `builtin` is platform-only, and `script` glue is deferred.
+
+## Prompts
+
+A prompt is frontmatter plus a raw template body.
+
+```text
+---
+name     = "weather_system"
+requires = ["location"]
+---
+You are a weather assistant. The user is asking about {{location}}.
+```
+
+Prompts do not own models or IO. Agents own those. Kastor checks that prompt variables can be satisfied by the agent using the prompt.
+
+## Project config
+
+Current project files are named `kastor.hcl` or use the `.kastor` extension.
+
+```hcl
+model "fast" {
+  provider = "openai"
+  id       = "gpt-4o-mini"
+
+  params {
+    temperature = 0.2
+    max_tokens  = 4096
+  }
+}
+
+target "langgraph" {
+  type   = "codegen"
+  output = "./gen/langgraph"
+}
+
+target "memory" {
+  type = "platform"
+}
+```
+
+`adl.hcl` appears in some early wording around the project, but it is not an implemented project filename in the current parser.
+
+## References and dependency inference
+
+References create validation edges and dependency edges.
+
+```hcl
+input "forecast_context" {
+  type    = string
+  default = agent.forecast.output.summary
+}
+```
+
+That reference means:
+
+- `agent.forecast` must exist
+- `agent.forecast` must declare `output "summary"`
+- `agent.weather` depends on `agent.forecast`
+
+In v0 codegen, cross-agent references order and validate the graph. They do not automatically run the upstream agent and pass data. The caller still provides the input value.
+
+Use `depends_on` when you need ordering without data flow:
+
+```hcl
+depends_on = [agent.geocoder]
+```
+
+Cycles are validation errors.
+
+## State
+
+For platform targets, Kastor stores local state in `kastor.state.json` at the module root.
+
+State maps block addresses to remote IDs and the last-applied config:
+
+```json
+{
+  "version": 1,
+  "serial": 1,
+  "targets": {
+    "memory": {
+      "resources": {
+        "agent.weather": {
+          "id": "mem-3",
+          "config": {}
+        }
+      }
+    }
+  }
+}
+```
+
+The resource unit is currently the agent. Models, prompts, and tools are folded into the agent config for platform reconciliation.
+
+Do not commit `kastor.state.json`. It is environment-specific.

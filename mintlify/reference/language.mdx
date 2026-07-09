@@ -1,0 +1,196 @@
+---
+title: "Language reference"
+description: "A concise reference for Kastor files and blocks."
+---
+
+Kastor uses HCL for `.agent`, `.tool`, `kastor.hcl`, and `*.kastor` files. Prompt files use HCL frontmatter plus a raw body.
+
+## `.agent`
+
+`.agent` files contain one or more `agent` blocks.
+
+```hcl
+agent "weather" {
+  description = "Answers weather questions for a location and date"
+
+  model         = model.fast
+  system_prompt = prompt.weather_system
+  tools         = [tool.web_search]
+
+  input "location" {
+    type        = string
+    description = "The location to get the weather for"
+  }
+
+  input "date" {
+    type     = string
+    optional = true
+  }
+
+  output "weather" {
+    type = string
+  }
+
+  depends_on = [agent.geocoder]
+}
+```
+
+Fields:
+
+| Field | Status | Notes |
+| --- | --- | --- |
+| `description` | optional | Human-readable summary. |
+| `model` | required | Reference like `model.fast`. |
+| `system_prompt` | optional | Reference like `prompt.weather_system`. |
+| `tools` | optional | List of `tool.<name>` references. |
+| `input` | optional | Named input blocks. |
+| `output` | optional | Named output blocks. |
+| `depends_on` | optional | List of `agent.<name>` references for ordering. |
+
+Input fields:
+
+| Field | Status | Notes |
+| --- | --- | --- |
+| `type` | required | Bare keyword: `string`, `number`, or `bool`. |
+| `description` | optional | Human-readable description. |
+| `optional` | optional | Boolean. |
+| `default` | optional | Literal value or `agent.<name>.output.<name>` reference. |
+
+Output fields:
+
+| Field | Status | Notes |
+| --- | --- | --- |
+| `type` | required | Bare keyword: `string`, `number`, or `bool`. |
+| `description` | optional | Human-readable description. |
+
+## `.tool`
+
+`.tool` files contain one or more `tool` blocks.
+
+```hcl
+tool "web_search" {
+  description = "Search the web"
+
+  param "query" {
+    type        = string
+    description = "The query to search for"
+  }
+
+  param "max_results" {
+    type    = number
+    default = 10
+  }
+
+  returns {
+    type = string
+  }
+
+  source {
+    kind = "mcp"
+    uri  = "mcp://search-server/tavily_search"
+  }
+}
+```
+
+Rules:
+
+- Exactly one `returns` block is required.
+- Exactly one `source` block is required.
+- Parameter types are bare keywords: `string`, `number`, or `bool`.
+- Parameter defaults must be literals of the declared type.
+- `default = null` is invalid. Omit the attribute instead.
+
+Source kinds:
+
+| Kind | Current behavior |
+| --- | --- |
+| `mcp` | Parsed and supported by LangGraph codegen through generated MCP bindings. |
+| `http` | Parsed and supported by LangGraph codegen as a POST wrapper. |
+| `runtime` | Parsed and supported by LangGraph codegen as a stub for user code. |
+| `builtin` | Parsed for platform targets; not valid for local LangGraph codegen. |
+| `script` | Parsed, but LangGraph execution glue is deferred. |
+
+## `.prompt`
+
+`.prompt` files begin with HCL frontmatter and then preserve the body byte for byte.
+
+```text
+---
+name     = "weather_system"
+requires = ["location", "forecast_context"]
+---
+You are a weather assistant. The user is asking about {{location}}.
+
+Existing forecast context, if any:
+{{forecast_context}}
+```
+
+Fields:
+
+| Field | Status | Notes |
+| --- | --- | --- |
+| `name` | required | Creates the `prompt.<name>` address. |
+| `requires` | optional | Variables expected in the body. If present, it must exactly match body variables. |
+
+Variables use `{{name}}` or `{{ name }}`. The identifier must match `[A-Za-z_][A-Za-z0-9_]*`.
+
+If `requires` is omitted, Kastor infers variables from the body. If `requires` is present, unused or missing variables are validation errors.
+
+## `kastor.hcl` and `*.kastor`
+
+Project files contain `model` and `target` blocks.
+
+```hcl
+model "fast" {
+  provider = "openai"
+  id       = "gpt-4o-mini"
+
+  params {
+    temperature = 0.2
+    max_tokens  = 4096
+  }
+}
+
+target "langgraph" {
+  type   = "codegen"
+  output = "./gen/langgraph"
+}
+
+target "memory" {
+  type = "platform"
+}
+```
+
+`model` fields:
+
+| Field | Status | Notes |
+| --- | --- | --- |
+| `provider` | required | Provider name such as `openai`, `anthropic`, `google`, or `ollama`. |
+| `id` | required | Provider model identifier. |
+| `params` | optional | Provider-specific key/value bag. |
+
+`target` fields:
+
+| Field | Status | Notes |
+| --- | --- | --- |
+| `type` | required | `codegen` or `platform`. |
+| `output` | required for `codegen` | Output directory for generated code. |
+| `auth` | optional for `platform` | Currently supports `api_key_env`. |
+
+Target labels select implementations:
+
+- `target "langgraph"` selects the LangGraph code generator.
+- `target "memory"` selects the built-in in-memory platform provider.
+- `target "openai_assistants"` is planned, not implemented in the current provider registry.
+
+## File discovery
+
+Kastor loads these files under the module directory:
+
+- `.agent`
+- `.tool`
+- `.prompt`
+- `.kastor`
+- `kastor.hcl`
+
+Hidden files and directories are skipped. Codegen output directories declared in project targets are skipped so generated files do not become module input.

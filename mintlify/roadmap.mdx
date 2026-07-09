@@ -1,0 +1,55 @@
+---
+title: "Roadmap"
+description: "What is implemented, planned for v0, and deferred."
+---
+
+Kastor is early. The useful distinction is what works today, what belongs in v0, and what should wait.
+
+## Implemented or prototyped today
+
+- Parser for `.agent`, `.tool`, `.prompt`, `kastor.hcl`, and `*.kastor`
+- Module loading across a directory tree
+- Reference resolution and duplicate detection
+- Prompt variable validation
+- Dependency graph construction and cycle detection
+- `kastor validate`
+- `kastor build` for LangGraph
+- `kastor plan`, `kastor apply`, and `kastor destroy`
+- Built-in `memory` platform provider
+- Local `kastor.state.json`
+- `kastor fmt`
+- Weather and scheduler examples
+
+## Intended v0
+
+- Parser and validation for the core language
+- One codegen target: LangGraph
+- One hosted platform provider
+- End-to-end weather-agent example
+- Clear state and drift semantics for platform reconciliation
+- Documentation that is useful from a cold GitHub, X, or Reddit click
+
+## Planned but not implemented in the current CLI
+
+- Hosted platform provider registration, such as `openai_assistants`
+- `kastor init`
+- Structured `--json` rendering for diagnostics and plans
+- More polished installation and release docs
+
+## Deferred v1 ideas
+
+- Agent memory and vector-store configuration
+- Guardrails for input/output filters, budgets, and rate limits
+- Multi-agent orchestration graphs beyond reference ordering
+- Module registry or package management
+- Secrets management beyond environment variables
+- Remote state backends and remote locking
+- Generated reference docs from schema definitions
+- MCP server surface for agent-operated validation, build, plan, and apply
+
+## Non-goals for v0
+
+- Becoming an agent runtime
+- Replacing LangGraph or hosted agent platforms
+- Standardizing every agent control-loop pattern
+- Building a visual agent editor
