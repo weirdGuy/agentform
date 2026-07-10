@@ -23,13 +23,14 @@ Kastor is early. The useful distinction is what works today, what belongs in v0,
 ## Intended v0
 
 - Parser and validation for the core language
-- One codegen target: LangGraph
-- One hosted platform provider
+- Two codegen targets: LangGraph and eve (Vercel)
+- One hosted platform provider (TBD — candidates: Bedrock AgentCore, Dify)
 - End-to-end weather-agent example
 - Clear state and drift semantics for platform reconciliation
 
 ## Planned but not implemented in the current CLI
 
+- `eve` codegen target (Vercel)
 - Hosted platform provider registration
 - `kastor init`
 - Structured `--json` rendering for diagnostics and plans

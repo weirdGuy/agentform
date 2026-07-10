@@ -29,7 +29,8 @@ Working today:
 
 Planned for v0:
 
-- hosted platform providers
+- a second codegen target: Vercel eve
+- hosted platform providers (in design — candidates: Bedrock AgentCore, Dify)
 
 Kastor is **not** an agent runtime.
 
@@ -209,7 +210,7 @@ References also build the dependency graph. A reference like `agent.forecast.out
 
 Kastor is not an agent runtime.
 
-Frameworks like LangGraph still execute agents. Hosted platforms like OpenAI Assistants still run managed agents. Kastor sits above them as the declarative source-of-truth layer: model, prompts, tools, inputs, outputs, dependencies, and targets.
+Frameworks like LangGraph still execute agents. Hosted platforms like Dify still run managed agents. Kastor sits above them as the declarative source-of-truth layer: model, prompts, tools, inputs, outputs, dependencies, and targets.
 
 Kastor also does not try to standardize the full behavior or control loop of an agent. That layer is still changing quickly. The narrower bet is that the outer contract around agents should be reviewable, versionable, and diffable.
 

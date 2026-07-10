@@ -2,7 +2,7 @@
 // it renders a loaded module into desired resource configurations, compares
 // them three ways (spec vs. state vs. remote) into a plan, and executes
 // plans against a platform through the Provider contract. Per-platform
-// reconcilers live in subpackages (provider/openai, ...) and implement
+// reconcilers live in subpackages (provider/memory, ...) and implement
 // Provider; nothing platform-specific appears in this package.
 //
 // The contract deliberately traffics only in serializable, provider-neutral

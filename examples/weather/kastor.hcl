@@ -16,7 +16,8 @@ target "langgraph" {
 
 # Platform target -> `kastor plan` / `kastor apply` against the built-in
 # ephemeral in-memory platform: no credentials, no network. Swap for a real
-# platform target (e.g. "openai_assistants", issue #16) once one ships.
+# platform target once one ships (provider TBD -- candidates: Bedrock
+# AgentCore, Dify; SPEC.md section 8).
 target "memory" {
   type = "platform"
 }
