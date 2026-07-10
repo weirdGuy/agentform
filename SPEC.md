@@ -9,7 +9,7 @@ Status: **draft v0** · Syntax: **HCL** · Implementation: **Go**
  
 ## 1. Vision
  
-Agents today are defined imperatively inside frameworks (LangGraph, CrewAI) or clicked together in platform UIs (OpenAI Assistants, Bedrock Agents). There is no vendor-neutral, versionable, reviewable source of truth.
+Agents today are defined imperatively inside frameworks (LangGraph, CrewAI) or clicked together in platform UIs (Dify). There is no vendor-neutral, versionable, reviewable source of truth. The first generation of managed agent platforms (OpenAI Assistants, Bedrock Agents) was deprecated within ~3 years of launch — evidence that agent definitions need a vendor-neutral, versionable home that outlives any one platform.
  
 Kastor provides:
  
@@ -150,7 +150,7 @@ tool "web_search" {
 |------|---------|
 | `mcp` | Tool served by an MCP server |
 | `http` | REST endpoint (OpenAPI-style descriptor) |
-| `builtin` | Provided by target platform (e.g. OpenAI's built-in web search) |
+| `builtin` | Provided by target platform (e.g. the target platform's hosted web-search tool) |
 | `runtime` | Implemented in user code within the generated project (codegen emits a stub) |
 | `script` | Inline/local script executed by generated glue code |
 
@@ -208,10 +208,11 @@ target "langgraph" {
 }
  
 # Managed platform target → `kastor plan` / `kastor apply`
-target "openai_assistants" {
+# Provider selection is tracked in the plan/apply milestone (§8); "dify" is illustrative.
+target "dify" {
   type = "platform"
   auth {
-    api_key_env = "OPENAI_API_KEY"
+    api_key_env = "DIFY_API_KEY"
   }
 }
 ```
@@ -221,7 +222,7 @@ target "openai_assistants" {
 - `codegen` targets require `output` and do not allow `auth`.
 - `platform` targets do not allow `output`; `auth` is optional (ambient credentials — env vars, instance roles — are the common case).
 - Fields that are meaningless for a target's type are errors, not ignored (configs rot through silent acceptance).
-- **A platform target's label selects its provider implementation**, exactly as a codegen target's label selects its generator: `target "openai_assistants"` binds to the OpenAI Assistants reconciler, `target "memory"` to the built-in in-memory platform. A label with no registered provider is an error naming the available providers. (A separate `provider` attribute is deliberately deferred until something forces it — e.g. two targets on the same platform kind in one module.)
+- **A platform target's label selects its provider implementation**, exactly as a codegen target's label selects its generator: `target "dify"` binds to the Dify reconciler, `target "memory"` to the built-in in-memory platform. A label with no registered provider is an error naming the available providers. (A separate `provider` attribute is deliberately deferred until something forces it — e.g. two targets on the same platform kind in one module.)
 - The `memory` platform is built in: an **ephemeral in-memory store** so plan/apply can be demonstrated and exercised — examples, onboarding, CI — with no credentials and no network. `auth` on it is an error (meaningless fields, again). Its remote objects die with the process, so a later invocation's plan truthfully reports previously applied resources as remote-missing drift.
  
 ---
@@ -258,10 +259,10 @@ Exit codes (all commands): 0 clean, 1 validation/codegen/plan/apply errors, 2 us
   "version": 1,
   "serial": 4,
   "targets": {
-    "openai_assistants": {
+    "dify": {
       "resources": {
         "agent.weather": {
-          "id": "asst_abc123",
+          "id": "agent-abc123",
           "config": { "model": { "id": "gpt-4o-mini", "provider": "openai" } },
           "dependencies": ["agent.geocoder"]
         }
@@ -316,11 +317,11 @@ internal/
   graph/            DAG construction, cycle detection, topo sort
   build/            codegen engine
     langgraph/      target: LangGraph (Python)
+    eve/            target: Vercel eve (TypeScript)
     crewai/         target: CrewAI (Python)
   provider/         platform reconcilers
     memory/         built-in in-memory platform (demos, examples, CI)
-    openai/         OpenAI Assistants API
-    bedrock/        AWS Bedrock Agents
+    <tbd>/          TBD — candidates: agentcore/, dify/
   state/            state file read/write, locking, diff
 ```
  
@@ -351,10 +352,10 @@ The plan/apply engine is target-agnostic and consumes exactly what `kastor valid
 ## 8. v0 Milestones
  
 1. Parser + `kastor validate` for `.agent`, `.tool`, `.prompt`, project file
-2. `kastor build` with **one** codegen target (pick LangGraph)
-3. `kastor plan/apply` with **one** platform provider (pick OpenAI Assistants)
+2. `kastor build` with **two** codegen targets: LangGraph and eve
+3. `kastor plan/apply` with **one** platform provider (TBD — candidates: Bedrock AgentCore, Dify)
 4. Examples repo: the weather agent end-to-end on both paths
-One codegen target + one provider proves the hybrid thesis. Everything else is expansion.
+Two codegen targets + one provider prove the hybrid thesis. Everything else is expansion.
 
 ## 9. Consumers & design constraints
 
@@ -394,5 +395,5 @@ AI-consumer thesis imposes these standing constraints:
   shelling out or screen-scraping text output.
 
 Sequencing: these constraints shape decisions from now on, but implementation
-lands after the core thesis is proven (§8 — one codegen target, one platform
+lands after the core thesis is proven (§8 — two codegen targets, one platform
 provider). The MCP server and generated docs are v1 milestones, not v0 scope.
