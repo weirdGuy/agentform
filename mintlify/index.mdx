@@ -40,8 +40,8 @@ That shape makes agent changes easier to review in pull requests and easier to r
 
 Kastor has two paths:
 
-- `kastor build` compiles a module into runnable framework code. LangGraph is the implemented first codegen target.
-- `kastor plan` and `kastor apply` reconcile platform targets using state, diffs, and dependency ordering. The built-in `memory` provider works today for local demos and tests. Hosted providers are planned for v0.
+- `kastor build` compiles a module into runnable framework code. LangGraph is the implemented first codegen target; a Vercel eve target is planned.
+- `kastor plan` and `kastor apply` reconcile platform targets using state, diffs, and dependency ordering. The built-in `memory` provider works today for local demos and tests. A hosted provider is planned for v0 (TBD — candidates: Bedrock AgentCore, Dify).
 
 The mental model is similar to Terraform, but Kastor starts one layer earlier: the agent definition itself.
 
@@ -61,7 +61,8 @@ Implemented or prototyped today:
 
 Planned for v0:
 
-- one hosted platform provider
+- the eve (Vercel) codegen target
+- one hosted platform provider (TBD — candidates: Bedrock AgentCore, Dify)
 - a complete end-to-end weather-agent path across codegen and platform reconciliation
 - tighter first-run packaging and docs
 

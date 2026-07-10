@@ -5,7 +5,7 @@ Kastor is "Terraform for AI agents": a declarative HCL spec compiled to agent fr
 ## What this is
 
 - Go CLI (`kastor`) that parses `.agent`, `.tool`, `.prompt`, and `kastor.hcl` project files
-- Two execution paths: `kastor build` (codegen → LangGraph first) and `kastor plan/apply` (platform reconciler → OpenAI Assistants first)
+- Two execution paths: `kastor build` (codegen → LangGraph shipped, eve planned) and `kastor plan/apply` (platform reconciler → provider TBD; candidates: Bedrock AgentCore, Dify)
 - Non-goals for v0: being a runtime, executing agents, eval harnesses
 
 ## Architecture
@@ -17,8 +17,8 @@ internal/
   schema/           typed config structs, validation
   module/           directory walk → symbol table, cross-file reference resolution
   graph/            DAG construction, cycle detection, topo sort
-  build/            codegen engine + per-target generators (build/langgraph/)
-  provider/         platform reconcilers (provider/openai/)
+  build/            codegen engine + per-target generators (build/langgraph/, build/eve/, build/crewai/)
+  provider/         platform reconcilers (provider/memory/; TBD — candidates: agentcore/, dify/)
   state/            state file read/write, locking, diff
 ```
 

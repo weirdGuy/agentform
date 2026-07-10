@@ -26,7 +26,7 @@
 
 ## Content boundaries
 
-- Do not claim OpenAI Assistants support, because this platform is phasing out of existence.
+- Do not claim support for a specific hosted platform provider; selection is TBD (candidates: Bedrock AgentCore, Dify). Never present OpenAI Assistants or Bedrock Agents Classic as targets — both are sunset.
 - Do not claim package-manager installation exists unless verified.
 - Do not document `adl.hcl` as implemented unless the parser supports it.
 - Do not document `kastor compile`; use `kastor build`.
