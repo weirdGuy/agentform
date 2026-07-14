@@ -1,0 +1,34 @@
+agent "triage" {
+  description = "Classifies an inbound support ticket into category, priority, and a one-line summary"
+
+  model         = model.fast
+  system_prompt = prompt.triage_system
+
+  input "subject" {
+    type        = string
+    description = "Ticket subject line"
+  }
+
+  input "body" {
+    type        = string
+    description = "Full ticket body as written by the customer"
+  }
+
+  input "customer_tier" {
+    type        = string
+    optional    = true
+    description = "Customer plan tier: free, pro, or enterprise. Blank when unknown."
+  }
+
+  output "category" {
+    type = string
+  }
+
+  output "priority" {
+    type = string
+  }
+
+  output "summary" {
+    type = string
+  }
+}
