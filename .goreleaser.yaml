@@ -18,11 +18,16 @@ builds:
     goarch:
       - amd64
       - arm64
+    # windows/arm64 is not a supported target (KAS-40): five binaries total.
+    ignore:
+      - goos: windows
+        goarch: arm64
     flags:
       - -trimpath
-    # cmd/kastor/root.go defines exactly one build-time variable: main.version.
+    # cmd/kastor/root.go defines exactly two build-time variables:
+    # main.version and main.commit.
     ldflags:
-      - -s -w -X main.version={{ .Version }}
+      - -s -w -X main.version={{ .Version }} -X main.commit={{ .ShortCommit }}
     mod_timestamp: "{{ .CommitTimestamp }}"
 
 archives:
@@ -57,22 +62,37 @@ changelog:
 snapshot:
   version_template: "{{ incpatch .Version }}-next"
 
-brews:
+release:
+  # Kastor is pre-1.0: set expectations at the top of every release note.
+  header: |
+    > [!NOTE]
+    > Kastor is pre-1.0. The v0 language semantics may still change until the
+    > v0 exit criteria ([KAS-36](https://linear.app/getkastor/issue/KAS-36)) are met.
+
+# Homebrew cask in weirdGuy/homebrew-tap (`brew install weirdGuy/tap/kastor`).
+# Casks are the current GoReleaser mechanism for taps (`brews` is deprecated)
+# and are macOS-only; Linux users have scripts/install.sh or `go install`.
+homebrew_casks:
   - name: kastor
+    binaries:
+      - kastor
     repository:
       owner: weirdGuy
       name: homebrew-tap
       # envOrDefault instead of .Env.X: goreleaser templates error on missing
       # env keys, and TAP_GITHUB_TOKEN may not exist as a secret yet.
       token: '{{ envOrDefault "TAP_GITHUB_TOKEN" "" }}'
-    # No token → skip pushing the formula instead of failing the release.
+    # No token → skip pushing the cask instead of failing the release.
     skip_upload: '{{ if eq (envOrDefault "TAP_GITHUB_TOKEN" "") "" }}true{{ else }}false{{ end }}'
-    directory: Formula
+    directory: Casks
     homepage: "https://github.com/weirdGuy/kastor"
     description: "Terraform for AI agents — declarative agent specs in HCL"
-    license: "Apache-2.0"
-    commit_msg_template: "Brew formula update for {{ .ProjectName }} version {{ .Tag }}"
-    test: |
-      system "#{bin}/kastor version"
-    install: |
-      bin.install "kastor"
+    commit_msg_template: "Brew cask update for {{ .ProjectName }} version {{ .Tag }}"
+    # Binaries are not signed/notarized (out of scope for v0), so clear the
+    # quarantine attribute Gatekeeper would otherwise enforce.
+    hooks:
+      post:
+        install: |
+          if OS.mac?
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/kastor"]
+          end
