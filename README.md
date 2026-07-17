@@ -251,10 +251,10 @@ Kastor defines the agent contract and generates a LangGraph project from that sp
 
 ## Install
 
-Homebrew:
+Homebrew (macOS):
 
 ```sh
-brew tap weirdGuy/tap && brew install kastor
+brew install weirdGuy/tap/kastor
 ```
 
 Install script:

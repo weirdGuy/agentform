@@ -154,11 +154,17 @@ Prompt files are left untouched because the body is preserved byte for byte.
 
 ## `kastor version`
 
-Print the CLI version.
+Print the CLI version and the commit it was built from.
 
 ```bash
 kastor version
 ```
+
+```console
+kastor version 0.1.0 (commit 1a2b3c4)
+```
+
+Release binaries stamp both values at build time; `go install` builds report the module version and VCS revision from Go build info, and untagged source builds fall back to `dev`.
 
 ## Planned or deferred commands and flags
 

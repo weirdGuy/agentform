@@ -1,0 +1,70 @@
+---
+title: "Installation"
+description: "Install the kastor CLI with Homebrew, the install script, go install, or a binary download."
+---
+
+Kastor ships as a single static binary for macOS (Apple Silicon and Intel), Linux (arm64 and amd64), and Windows (amd64). Pick whichever install path fits your machine, then [verify the install](#verify-the-install).
+
+## Homebrew (macOS)
+
+```bash
+brew install weirdGuy/tap/kastor
+```
+
+Upgrades arrive through the same tap: `brew upgrade kastor`.
+
+## Install script (macOS and Linux)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/weirdGuy/kastor/main/scripts/install.sh | sh
+```
+
+The script downloads the latest release for your OS and architecture, verifies it against the release `checksums.txt`, and installs to `/usr/local/bin` when writable, otherwise `~/.local/bin`. It never invokes `sudo`. Set `KASTOR_INSTALL_DIR` to override the destination.
+
+## go install
+
+With Go 1.26+:
+
+```bash
+go install github.com/weirdGuy/kastor/cmd/kastor@latest
+```
+
+## Binary download
+
+Every release on the [releases page](https://github.com/weirdGuy/kastor/releases) includes archives named `kastor_<version>_<os>_<arch>`:
+
+| Platform | Archive |
+| --- | --- |
+| macOS Apple Silicon | `kastor_<version>_darwin_arm64.tar.gz` |
+| macOS Intel | `kastor_<version>_darwin_amd64.tar.gz` |
+| Linux arm64 | `kastor_<version>_linux_arm64.tar.gz` |
+| Linux amd64 | `kastor_<version>_linux_amd64.tar.gz` |
+| Windows amd64 | `kastor_<version>_windows_amd64.zip` |
+
+Verify the archive against `checksums.txt`, extract it, and put the `kastor` binary on your `PATH`.
+
+## Build from source
+
+```bash
+git clone https://github.com/weirdGuy/kastor.git
+cd kastor
+go build -o kastor ./cmd/kastor
+```
+
+## Verify the install
+
+```bash
+kastor version
+```
+
+Expected shape:
+
+```console
+kastor version 0.1.0 (commit 1a2b3c4)
+```
+
+<Note>
+  Kastor is pre-1.0. The v0 language semantics may still change until the v0 exit criteria are met — pin a version if you script against the CLI.
+</Note>
+
+Next: the [Quickstart](/quickstart) scaffolds a module and walks the validate → build → plan → apply flow.

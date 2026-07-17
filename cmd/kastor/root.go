@@ -2,12 +2,38 @@ package main
 
 import (
 	"fmt"
+	"runtime/debug"
 
 	"github.com/spf13/cobra"
 )
 
-// version is set at build time via -ldflags "-X main.version=...".
-var version = "dev"
+// version and commit are set at release-build time via
+// -ldflags "-X main.version=... -X main.commit=...".
+var (
+	version = "dev"
+	commit  = "none"
+)
+
+// resolveVersion returns the version and commit to report, falling back to
+// Go build info for binaries built without ldflags (go build, go install).
+func resolveVersion() (string, string) {
+	v, c := version, commit
+	bi, ok := debug.ReadBuildInfo()
+	if !ok {
+		return v, c
+	}
+	if v == "dev" && bi.Main.Version != "" && bi.Main.Version != "(devel)" {
+		v = bi.Main.Version
+	}
+	if c == "none" {
+		for _, s := range bi.Settings {
+			if s.Key == "vcs.revision" && len(s.Value) >= 7 {
+				c = s.Value[:7]
+			}
+		}
+	}
+	return v, c
+}
 
 func newRootCmd() *cobra.Command {
 	root := &cobra.Command{
@@ -42,7 +68,8 @@ func newVersionCmd() *cobra.Command {
 		Use:   "version",
 		Short: "Print the kastor version",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			_, err := fmt.Fprintf(cmd.OutOrStdout(), "kastor version %s\n", version)
+			v, c := resolveVersion()
+			_, err := fmt.Fprintf(cmd.OutOrStdout(), "kastor version %s (commit %s)\n", v, c)
 			return err
 		},
 	}

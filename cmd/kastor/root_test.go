@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"regexp"
 	"strings"
 	"testing"
 )
@@ -16,7 +17,7 @@ func TestRootCommand(t *testing.T) {
 		{
 			name:    "version subcommand prints version",
 			args:    []string{"version"},
-			wantOut: "kastor version dev",
+			wantOut: "kastor version ",
 		},
 		{
 			name:    "no args prints help",
@@ -46,6 +47,22 @@ func TestRootCommand(t *testing.T) {
 				t.Errorf("output = %q, want it to contain %q", out.String(), tt.wantOut)
 			}
 		})
+	}
+}
+
+// The exact version and commit depend on how the binary was built (ldflags,
+// go build info, or neither), so only the output shape is asserted.
+func TestVersionOutputFormat(t *testing.T) {
+	cmd := newRootCmd()
+	var out bytes.Buffer
+	cmd.SetOut(&out)
+	cmd.SetArgs([]string{"version"})
+	if err := cmd.Execute(); err != nil {
+		t.Fatalf("Execute() error = %v", err)
+	}
+	want := regexp.MustCompile(`^kastor version \S+ \(commit \S+\)\n$`)
+	if !want.MatchString(out.String()) {
+		t.Errorf("version output = %q, want it to match %q", out.String(), want)
 	}
 }
 
