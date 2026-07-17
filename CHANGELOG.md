@@ -12,6 +12,14 @@ v0 exit criteria ([KAS-36](https://linear.app/getkastor/issue/KAS-36)) are met.
 
 ### Fixed
 
+- Homebrew cask publishing: the tap `token` field must be exactly
+  `{{ .Env.VAR_NAME }}` — GoReleaser rejects any other interpolation, so
+  v0.1.1 also shipped binaries but no cask (KAS-40)
+
+## [0.1.1] - 2026-07-17
+
+### Fixed
+
 - Homebrew cask publishing: the tap token template used a function that does
   not exist in OSS GoReleaser, failing the release at publish time — v0.1.0
   shipped binaries but no cask (KAS-40)
@@ -66,6 +74,7 @@ v0 exit criteria ([KAS-36](https://linear.app/getkastor/issue/KAS-36)) are met.
 - Release automation: GoReleaser + GitHub Actions on `v*` tags
 - Apache License 2.0
 
-[Unreleased]: https://github.com/weirdGuy/kastor/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/weirdGuy/kastor/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/weirdGuy/kastor/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/weirdGuy/kastor/compare/v0.0.1-alpha...v0.1.0
 [0.0.1-alpha]: https://github.com/weirdGuy/kastor/releases/tag/v0.0.1-alpha

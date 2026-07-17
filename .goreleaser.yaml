@@ -79,13 +79,14 @@ homebrew_casks:
     repository:
       owner: weirdGuy
       name: homebrew-tap
-      # `index .Env` instead of .Env.X: plain field access errors on missing
-      # env keys, and TAP_GITHUB_TOKEN may be unset (local runs, forks).
-      # Only Go template builtins here — publish-stage templates like this one
-      # are NOT evaluated by `goreleaser check` or the snapshot dry-run, so a
-      # bad function name only surfaces during a real release (v0.1.0 failed
-      # on the non-existent `envOrDefault`).
-      token: '{{ if index .Env "TAP_GITHUB_TOKEN" }}{{ .Env.TAP_GITHUB_TOKEN }}{{ end }}'
+      # Must be EXACTLY this shape: goreleaser rejects any other interpolation
+      # in token fields ("expected {{ .Env.VAR_NAME }} only") and reads the
+      # named variable itself, so a missing/empty var cannot error here.
+      # Publish-stage fields like token/skip_upload are NOT evaluated by
+      # `goreleaser check` or the snapshot dry-run — they only run during a
+      # real release (v0.1.0 and v0.1.1 both failed there), so keep them to
+      # exactly the documented forms.
+      token: "{{ .Env.TAP_GITHUB_TOKEN }}"
     # No token → skip pushing the cask instead of failing the release.
     skip_upload: '{{ if index .Env "TAP_GITHUB_TOKEN" }}false{{ else }}true{{ end }}'
     directory: Casks
