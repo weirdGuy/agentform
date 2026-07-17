@@ -10,6 +10,8 @@ v0 exit criteria ([KAS-36](https://linear.app/getkastor/issue/KAS-36)) are met.
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-07-17
+
 ### Fixed
 
 - Homebrew cask publishing: the tap `token` field must be exactly
@@ -74,7 +76,8 @@ v0 exit criteria ([KAS-36](https://linear.app/getkastor/issue/KAS-36)) are met.
 - Release automation: GoReleaser + GitHub Actions on `v*` tags
 - Apache License 2.0
 
-[Unreleased]: https://github.com/weirdGuy/kastor/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/weirdGuy/kastor/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/weirdGuy/kastor/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/weirdGuy/kastor/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/weirdGuy/kastor/compare/v0.0.1-alpha...v0.1.0
 [0.0.1-alpha]: https://github.com/weirdGuy/kastor/releases/tag/v0.0.1-alpha
