@@ -20,15 +20,42 @@ langchain-mcp-adapters connection dicts, e.g.:
 import asyncio
 import json
 import os
-
-from langchain_mcp_adapters.client import MultiServerMCPClient
+from typing import Any
 
 _CONFIG_ENV = "KASTOR_MCP_CONFIG"
 _CONFIG_FILE = "mcp_servers.json"
 
 
+def _config_path():
+    """Path to the MCP server config: KASTOR_MCP_CONFIG, else mcp_servers.json."""
+    return os.environ.get(_CONFIG_ENV, _CONFIG_FILE)
+
+
+def ensure_config() -> None:
+    """Fail fast at startup if the MCP server config is missing.
+
+    Generated tools bind MCP servers whose connection details live in the config
+    file; without it the first tool call would fail deep inside a run. Called
+    from main.py before any agent runs so the error arrives up front.
+    """
+    path = _config_path()
+    if os.path.exists(path):
+        return
+    if _CONFIG_ENV in os.environ:
+        looked = f"{path!r} (from {_CONFIG_ENV})"
+    else:
+        looked = f"{_CONFIG_FILE!r} in the working directory"
+    raise SystemExit(
+        "kastor: MCP server config not found\n"
+        f"  found:    no file at {looked}\n"
+        "  expected: a langchain-mcp-adapters connection file, keyed by server name\n"
+        f"  fix:      create {_CONFIG_FILE!r} in the working directory, "
+        f"or point {_CONFIG_ENV} at an existing file"
+    )
+
+
 def _connection(server):
-    path = os.environ.get(_CONFIG_ENV, _CONFIG_FILE)
+    path = _config_path()
     try:
         with open(path, encoding="utf-8") as config:
             servers = json.load(config)
@@ -41,15 +68,28 @@ def _connection(server):
     return servers[server]
 
 
-def call_mcp_tool(server, tool, arguments):
+def _select_tool(server, tool, tools):
+    """Return the named tool, or fail listing what the server advertises."""
+    for candidate in tools:
+        if candidate.name == tool:
+            return candidate
+    advertised = ", ".join(sorted(candidate.name for candidate in tools)) or "(none)"
+    raise RuntimeError(
+        f"kastor: MCP server {server!r} does not expose tool {tool!r}\n"
+        f"  found:    tool {tool!r} is not on server {server!r}\n"
+        f"  expected: one of the tools the server advertises: {advertised}\n"
+        f"  fix:      point the tool's spec URI at mcp://{server}/<an advertised tool>"
+    )
+
+
+def call_mcp_tool(server, tool, arguments) -> Any:
     """Call one tool on one MCP server and return its result."""
 
     async def _call():
+        from langchain_mcp_adapters.client import MultiServerMCPClient
+
         client = MultiServerMCPClient({server: _connection(server)})
         tools = await client.get_tools(server_name=server)
-        for candidate in tools:
-            if candidate.name == tool:
-                return await candidate.ainvoke(arguments)
-        raise KeyError(f"MCP server {server!r} does not expose tool {tool!r}")
+        return await _select_tool(server, tool, tools).ainvoke(arguments)
 
     return asyncio.run(_call())
