@@ -8,7 +8,7 @@ import re
 _VARIABLE = re.compile(r"\{\{\s*([A-Za-z_][A-Za-z0-9_]*)\s*\}\}")
 
 
-def render(template, variables):
+def render(template, variables) -> str:
     """Substitute {{var}} references in an Kastor prompt template.
 
     Missing and None values render as the empty string. Brace sequences
